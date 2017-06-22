@@ -61,6 +61,10 @@ public:
 	//Experimental: Searches for motion controller indices, in case they aren't set to 1 and 2
 	bool bValidateControllerIndices = false;
 
+	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn|Motion Controllers|Laser Pointer", meta = (EditCondition = "bLaserPointer"))
+	//How far forward to check for laser collisions
+	float LaserDrawDistance = 1000.f;
+
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Inherited Components~~ 
