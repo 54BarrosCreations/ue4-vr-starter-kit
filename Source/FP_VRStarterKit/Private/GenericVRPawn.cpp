@@ -24,6 +24,10 @@ AGenericVRPawn::AGenericVRPawn()
 void AGenericVRPawn::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!bValidateControllerIndices) {
+		mLeftControllerIndex = LeftControllerIndex;
+		mRightControllerIndex = RightControllerIndex;
+	}else GetMotionControllerIndices();
 	
 }
 
@@ -31,7 +35,7 @@ void AGenericVRPawn::BeginPlay()
 void AGenericVRPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UpdateMotionControllerPositions();
+	if (bUseMotionControllers) UpdateMotionControllerPositions();
 }
 
 // Called to bind functionality to input
@@ -45,7 +49,11 @@ void AGenericVRPawn::GetMotionControllerIndices()
 	TArray<int32> ControllerIndices;
 	USteamVRFunctionLibrary::GetValidTrackedDeviceIds(ESteamVRTrackedDeviceType::Controller, ControllerIndices);
 	if (ControllerIndices.IsValidIndex(0)) {
-		
+		mLeftControllerIndex = ControllerIndices[0];
+	} 
+
+	if (ControllerIndices.IsValidIndex(1)) {
+		mRightControllerIndex = ControllerIndices[1];
 	}
 }
 
@@ -56,13 +64,13 @@ void AGenericVRPawn::UpdateMotionControllerPositions()
 	//Left Controller
 	FVector LPos;
 	FRotator LRot;
-	USteamVRFunctionLibrary::GetTrackedDevicePositionAndOrientation(1, LPos, LRot);
+	USteamVRFunctionLibrary::GetHandPositionAndOrientation(0, EControllerHand::Left, LPos, LRot);
 	LeftControllerRoot->SetRelativeTransform(FTransform(LRot, LPos, FVector(1, 1, 1)));
 
 	//Right Controller
 	FVector RPos;
 	FRotator RRot;
-	USteamVRFunctionLibrary::GetTrackedDevicePositionAndOrientation(2, RPos, RRot);
+	USteamVRFunctionLibrary::GetHandPositionAndOrientation(0, EControllerHand::Right, RPos, RRot);
 	RightControllerRoot->SetRelativeTransform(FTransform(RRot, RPos, FVector(1, 1, 1)));
 }
 

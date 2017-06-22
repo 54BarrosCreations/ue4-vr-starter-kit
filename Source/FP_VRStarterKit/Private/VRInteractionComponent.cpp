@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "VRInteractionComponent.h"
+#include "Runtime/UMG/Public/Components/WidgetComponent.h"
+#include "VRWidgetComponent.h"
 
 
 // Sets default values for this component's properties
@@ -47,13 +49,18 @@ bool UVRInteractionComponent::TraceForUI(USceneComponent* LaserSource, FVector& 
 		TraceParameters
 	);
 
+	//Check for a hit, and pass relevant information to our out parameters
 	if (HitResult.bBlockingHit) {
 		OutHitPoint = HitResult.ImpactPoint;
 		OutHitComponent = HitResult.GetComponent();
 
-		return true;
+		if (!OutHitComponent) return false; //<--Return if there is a hit, but no hit component, because something went horribly wrong.
+
+		if (OutHitComponent->IsA<UVRWidgetComponent>() || OutHitComponent->IsA<UWidgetComponent>()) return true;
+		else return false;
 	}
 
+	//Set out params to default values if there is no hit
 	OutHitPoint = FVector::ZeroVector;
 	OutHitComponent = nullptr;
 	return false;

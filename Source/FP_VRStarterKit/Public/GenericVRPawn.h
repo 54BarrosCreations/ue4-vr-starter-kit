@@ -89,17 +89,27 @@ public:
 	//Root Component for Right Motion Controller Mesh
 	USceneComponent* RightControllerRoot = nullptr;
 
+	UPROPERTY(VisibleDefaultsOnly)
+	//Particle Emitter for the Left Laser Beam, only visible if using laser interaction
+	UParticleSystemComponent* LeftControllerBeam = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	//Particle Emitter for the Right Laser Beam, only visible if using laser interaction
+	UParticleSystemComponent* RightControllerBeam = nullptr;
+
 private:
 
 	//Controller Indices
-	int32 mLeftControllerIndex = 1;
-	int32 mRightControllerIndex = 2;
+	int32 mLeftControllerIndex = -1;
+	int32 mRightControllerIndex = -1;
 
 	//Get Motion Controller Indices, in case they are not set to 1 and 2
 	void GetMotionControllerIndices();
 
 	//Update postion of motion controllers
 	void UpdateMotionControllerPositions();
+
+	
 
 
 

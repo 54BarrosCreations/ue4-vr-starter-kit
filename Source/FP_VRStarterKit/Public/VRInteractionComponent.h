@@ -7,6 +7,7 @@
 #include "GenericVRPawn.h"
 #include "VRInteractionComponent.generated.h"
 
+class UWidgetComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FP_VRSTARTERKIT_API UVRInteractionComponent : public UActorComponent

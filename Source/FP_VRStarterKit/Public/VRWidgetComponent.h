@@ -18,7 +18,22 @@ class FP_VRSTARTERKIT_API UVRWidgetComponent : public UWidgetComponent
 {
 	GENERATED_BODY()
 	
-	
+	UPROPERTY(BlueprintAssignable, Category = Events)
+	FWidgetEvent MotionControllerTriggerDown;
+
+	UPROPERTY(BlueprintAssignable, Category = Events)
+	FWidgetEvent MotionControllerTriggerUp;
+
+	UPROPERTY(BlueprintAssignable, Category = Events)
+	FWidgetEvent HighlightWidget;
+
+	UPROPERTY(BlueprintAssignable, Category = Events)
+	FWidgetEvent SelectWidget;
+
+	UPROPERTY(BlueprintAssignable, Category = Events)
+	FWidgetEvent DeselectWidget;
+
+
 	
 	
 };
