@@ -29,9 +29,26 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	AGenericVRPawn* ParentPawn = nullptr;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool RightControllerActive = false;
+
 	UFUNCTION(BlueprintCallable, Category = "VR Interaction Component Functions")
 	bool TraceForUI(USceneComponent* LaserSource, FVector& OutHitPoint, USceneComponent*& OutHitComponent);
 
+	UFUNCTION(BlueprintCallable, Category = "VR Interaction Component Functions")
+	void SetLeftLaserActive(bool newActive);
+
+	UFUNCTION(BlueprintCallable, Category = "VR Interaction Component Functions")
+	void SetRightLaserActive(bool newActive);
+
+private:
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Parent Components
+	void GetParentPawnAndComponents();
+
+	UParticleSystemComponent* PS_LeftLaserBeam = nullptr;
+	UParticleSystemComponent* PS_RightLaserBeam = nullptr;
 		
 	
 };

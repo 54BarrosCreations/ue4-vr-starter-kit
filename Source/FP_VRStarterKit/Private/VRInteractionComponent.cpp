@@ -66,3 +66,29 @@ bool UVRInteractionComponent::TraceForUI(USceneComponent* LaserSource, FVector& 
 	return false;
 }
 
+void UVRInteractionComponent::SetLeftLaserActive(bool newActive)
+{
+	RightControllerActive = !newActive;
+	if (PS_LeftLaserBeam)	PS_LeftLaserBeam->SetVisibility(newActive);
+}
+
+void UVRInteractionComponent::SetRightLaserActive(bool newActive)
+{
+	RightControllerActive = newActive;
+	if (PS_RightLaserBeam)	PS_RightLaserBeam->SetVisibility(newActive);
+}
+
+void UVRInteractionComponent::GetParentPawnAndComponents()
+{
+	auto p = GetOwner();
+	if (p->IsA<AGenericVRPawn>()) ParentPawn = Cast<AGenericVRPawn>(p);
+	else return; //<--Return if pawn is of incorrect type
+
+	if (ParentPawn->PS_LeftControllerBeam) PS_LeftLaserBeam = ParentPawn->PS_LeftControllerBeam;
+	else UE_LOG(LogTemp, Error, TEXT("%s: Interaction Component: No Particle system assigned to PS_LeftControllerBeam."), *ParentPawn->GetName());
+
+	if (ParentPawn->PS_LeftControllerBeam) PS_RightLaserBeam = ParentPawn->PS_RightControllerBeam;
+	else UE_LOG(LogTemp, Error, TEXT("%s: Interaction Component: No Particle system assigned to PS_RightControllerBeam."), *ParentPawn->GetName());
+	
+}
+

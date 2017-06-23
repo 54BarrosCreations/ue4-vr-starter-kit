@@ -42,24 +42,12 @@ public:
 	bool bUseLaserPointer = true;
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn|Motion Controllers|Controller Options", meta = (EditCondition = "bUseMotionControllers"))
-	//Controller Index to assign to the Left Controller Object, if Applicable
-	int32 LeftControllerIndex = 1;
-
-	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn|Motion Controllers|Controller Options", meta = (EditCondition = "bUseMotionControllers"))
-	//Controller Index to assign to the Right Controller Object, if Applicable
-	int32 RightControllerIndex = 2;
-
-	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn|Motion Controllers|Controller Options", meta = (EditCondition = "bUseMotionControllers"))
 	//If true, Left Controller will be enabled.
 	bool bUseLeftController = true;
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn|Motion Controllers|Controller Options", meta = (EditCondition = "bUseMotionControllers"))
 	//If true, Right Controller will be enabled.
 	bool bUseRightController = true;
-
-	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn|Motion Controllers|Experimental")
-	//Experimental: Searches for motion controller indices, in case they aren't set to 1 and 2
-	bool bValidateControllerIndices = false;
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn|Motion Controllers|Laser Pointer", meta = (EditCondition = "bLaserPointer"))
 	//How far forward to check for laser collisions
@@ -91,20 +79,13 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly)
 	//Particle Emitter for the Left Laser Beam, only visible if using laser interaction
-	UParticleSystemComponent* LeftControllerBeam = nullptr;
+	UParticleSystemComponent* PS_LeftControllerBeam = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
 	//Particle Emitter for the Right Laser Beam, only visible if using laser interaction
-	UParticleSystemComponent* RightControllerBeam = nullptr;
+	UParticleSystemComponent* PS_RightControllerBeam = nullptr;
 
 private:
-
-	//Controller Indices
-	int32 mLeftControllerIndex = -1;
-	int32 mRightControllerIndex = -1;
-
-	//Get Motion Controller Indices, in case they are not set to 1 and 2
-	void GetMotionControllerIndices();
 
 	//Update postion of motion controllers
 	void UpdateMotionControllerPositions();

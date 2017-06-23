@@ -24,10 +24,6 @@ AGenericVRPawn::AGenericVRPawn()
 void AGenericVRPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	if (!bValidateControllerIndices) {
-		mLeftControllerIndex = LeftControllerIndex;
-		mRightControllerIndex = RightControllerIndex;
-	}else GetMotionControllerIndices();
 	
 }
 
@@ -42,19 +38,6 @@ void AGenericVRPawn::Tick(float DeltaTime)
 void AGenericVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
-void AGenericVRPawn::GetMotionControllerIndices()
-{
-	TArray<int32> ControllerIndices;
-	USteamVRFunctionLibrary::GetValidTrackedDeviceIds(ESteamVRTrackedDeviceType::Controller, ControllerIndices);
-	if (ControllerIndices.IsValidIndex(0)) {
-		mLeftControllerIndex = ControllerIndices[0];
-	} 
-
-	if (ControllerIndices.IsValidIndex(1)) {
-		mRightControllerIndex = ControllerIndices[1];
-	}
 }
 
 void AGenericVRPawn::UpdateMotionControllerPositions()

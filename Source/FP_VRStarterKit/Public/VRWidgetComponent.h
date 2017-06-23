@@ -13,7 +13,7 @@ class UVRInteractionComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWidgetEvent, AGenericVRPawn*, CallingPawn, UVRInteractionComponent*, InteractionComponent);
 
-UCLASS()
+UCLASS(ClassGroup = (Interaction), meta = (BlueprintSpawnableComponent))
 class FP_VRSTARTERKIT_API UVRWidgetComponent : public UWidgetComponent
 {
 	GENERATED_BODY()
