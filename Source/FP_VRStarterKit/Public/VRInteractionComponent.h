@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GenericVRPawn.h"
 #include "VRInteractionComponent.generated.h"
 
 class UWidgetComponent;
+class AGenericVRPawn;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FP_VRSTARTERKIT_API UVRInteractionComponent : public UActorComponent
@@ -29,6 +29,8 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	AGenericVRPawn* ParentPawn = nullptr;
 
+	bool ControllerFirstTimeActive = true;
+
 	UPROPERTY(BlueprintReadOnly)
 	bool RightControllerActive = false;
 
@@ -36,10 +38,9 @@ public:
 	bool TraceForUI(USceneComponent* LaserSource, FVector& OutHitPoint, USceneComponent*& OutHitComponent);
 
 	UFUNCTION(BlueprintCallable, Category = "VR Interaction Component Functions")
-	void SetLeftLaserActive(bool newActive);
-
-	UFUNCTION(BlueprintCallable, Category = "VR Interaction Component Functions")
 	void SetRightLaserActive(bool newActive);
+
+	USceneComponent* HitComponent = nullptr;
 
 private:
 

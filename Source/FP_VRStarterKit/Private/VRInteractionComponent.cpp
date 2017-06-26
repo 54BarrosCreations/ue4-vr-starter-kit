@@ -2,6 +2,7 @@
 
 #include "VRInteractionComponent.h"
 #include "Runtime/UMG/Public/Components/WidgetComponent.h"
+#include "GenericVRPawn.h"
 #include "VRWidgetComponent.h"
 
 
@@ -20,8 +21,7 @@ UVRInteractionComponent::UVRInteractionComponent()
 void UVRInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
+	GetParentPawnAndComponents();
 	
 }
 
@@ -30,8 +30,6 @@ void UVRInteractionComponent::BeginPlay()
 void UVRInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 bool UVRInteractionComponent::TraceForUI(USceneComponent* LaserSource, FVector& OutHitPoint, USceneComponent*& OutHitComponent)
@@ -41,6 +39,9 @@ bool UVRInteractionComponent::TraceForUI(USceneComponent* LaserSource, FVector& 
 	FHitResult HitResult;
 
 	//Trace for ui hit
+	auto W = GetWorld();
+	if (!W || !ParentPawn) return false;
+
 	GetWorld()->LineTraceSingleByChannel(
 		HitResult,
 		LaserSource->GetComponentLocation(),
@@ -55,27 +56,19 @@ bool UVRInteractionComponent::TraceForUI(USceneComponent* LaserSource, FVector& 
 		OutHitComponent = HitResult.GetComponent();
 
 		if (!OutHitComponent) return false; //<--Return if there is a hit, but no hit component, because something went horribly wrong.
-
 		if (OutHitComponent->IsA<UVRWidgetComponent>() || OutHitComponent->IsA<UWidgetComponent>()) return true;
 		else return false;
 	}
 
 	//Set out params to default values if there is no hit
-	OutHitPoint = FVector::ZeroVector;
+	OutHitPoint = FVector(((LaserSource->GetForwardVector() + LaserSource->GetComponentRotation().Vector()) * ParentPawn->LaserDrawDistance) + LaserSource->GetComponentLocation());
 	OutHitComponent = nullptr;
 	return false;
-}
-
-void UVRInteractionComponent::SetLeftLaserActive(bool newActive)
-{
-	RightControllerActive = !newActive;
-	if (PS_LeftLaserBeam)	PS_LeftLaserBeam->SetVisibility(newActive);
 }
 
 void UVRInteractionComponent::SetRightLaserActive(bool newActive)
 {
 	RightControllerActive = newActive;
-	if (PS_RightLaserBeam)	PS_RightLaserBeam->SetVisibility(newActive);
 }
 
 void UVRInteractionComponent::GetParentPawnAndComponents()

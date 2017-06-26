@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine.h"
+#include "VRInteractionComponent.h"
 #include "SteamVRFunctionLibrary.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "HeadMountedDisplay.h"
@@ -78,6 +79,10 @@ public:
 	USceneComponent* RightControllerRoot = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
+	//Controls ui interaction
+	UVRInteractionComponent* InteractionComponent = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly)
 	//Particle Emitter for the Left Laser Beam, only visible if using laser interaction
 	UParticleSystemComponent* PS_LeftControllerBeam = nullptr;
 
@@ -85,10 +90,19 @@ public:
 	//Particle Emitter for the Right Laser Beam, only visible if using laser interaction
 	UParticleSystemComponent* PS_RightControllerBeam = nullptr;
 
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Functions~~
+
+	UFUNCTION(BlueprintCallable, Category = "Generic VR Pawn Functions")
+	void FirstTimeSetActiveController();
+
 private:
 
 	//Update postion of motion controllers
 	void UpdateMotionControllerPositions();
+
+	UFUNCTION()
+	void LeftTriggerDown();
 
 	
 

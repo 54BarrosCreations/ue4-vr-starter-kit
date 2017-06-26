@@ -18,13 +18,19 @@ AGenericVRPawn::AGenericVRPawn()
 	LeftControllerRoot->SetupAttachment(VROrigin);
 	RightControllerRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Right Controller"));
 	RightControllerRoot->SetupAttachment(VROrigin);
+	InteractionComponent = CreateDefaultSubobject<UVRInteractionComponent>(TEXT("Interaction Component"));
+	PS_LeftControllerBeam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Left Beam"));
+	PS_LeftControllerBeam->SetupAttachment(LeftControllerRoot);
+	PS_LeftControllerBeam->SetRelativeLocation(FVector::ZeroVector);
+	PS_RightControllerBeam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Right Beam"));
+	PS_RightControllerBeam->SetupAttachment(RightControllerRoot);
+	PS_RightControllerBeam->SetRelativeLocation(FVector::ZeroVector);
 }
 
 // Called when the game starts or when spawned
 void AGenericVRPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -32,12 +38,51 @@ void AGenericVRPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (bUseMotionControllers) UpdateMotionControllerPositions();
+	if (InteractionComponent->ControllerFirstTimeActive) FirstTimeSetActiveController();
+	else {
+		FVector LaserEnd;
+		USceneComponent* HitComponent;
+		if (InteractionComponent->RightControllerActive) {
+			if (InteractionComponent->TraceForUI(RightControllerRoot, LaserEnd, HitComponent)) {
+				PS_RightControllerBeam->SetBeamSourcePoint(0, RightControllerRoot->GetComponentLocation(), 0);
+				PS_RightControllerBeam->SetBeamEndPoint(0, LaserEnd);
+				if (PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(false);
+				if (!PS_RightControllerBeam->bVisible) PS_RightControllerBeam->SetVisibility(true);
+			}
+			else {
+				if (PS_RightControllerBeam->bVisible) PS_RightControllerBeam->SetVisibility(false);
+			}
+		}else if (!InteractionComponent->RightControllerActive) {
+			if (InteractionComponent->TraceForUI(LeftControllerRoot, LaserEnd, HitComponent)) {
+				PS_LeftControllerBeam->SetBeamSourcePoint(0, LeftControllerRoot->GetComponentLocation(), 0);
+				PS_LeftControllerBeam->SetBeamEndPoint(0, LaserEnd);
+				if (PS_RightControllerBeam->bVisible) PS_RightControllerBeam->SetVisibility(false);
+				if (!PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(true);
+			}else {
+				if (PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(false);
+			}
+		}
+	}
 }
 
 // Called to bind functionality to input
 void AGenericVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AGenericVRPawn::FirstTimeSetActiveController()
+{
+	if (!InteractionComponent) return;
+	FVector V;
+	USceneComponent* C;
+	if (InteractionComponent->TraceForUI(LeftControllerRoot, V, C)) {
+		InteractionComponent->SetRightLaserActive(true);
+		InteractionComponent->ControllerFirstTimeActive = false;
+	}else if (InteractionComponent->TraceForUI(RightControllerRoot, V, C)) {
+		InteractionComponent->SetRightLaserActive(true);
+		InteractionComponent->ControllerFirstTimeActive = false;
+	}
 }
 
 void AGenericVRPawn::UpdateMotionControllerPositions()
@@ -55,5 +100,9 @@ void AGenericVRPawn::UpdateMotionControllerPositions()
 	FRotator RRot;
 	USteamVRFunctionLibrary::GetHandPositionAndOrientation(0, EControllerHand::Right, RPos, RRot);
 	RightControllerRoot->SetRelativeTransform(FTransform(RRot, RPos, FVector(1, 1, 1)));
+}
+
+void AGenericVRPawn::LeftTriggerDown()
+{
 }
 
