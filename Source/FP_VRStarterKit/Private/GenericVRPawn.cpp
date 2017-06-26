@@ -38,48 +38,24 @@ void AGenericVRPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (bUseMotionControllers) UpdateMotionControllerPositions();
-	if (InteractionComponent->ControllerFirstTimeActive) FirstTimeSetActiveController();
-	else {
-		FVector LaserEnd;
-		USceneComponent* HitComponent;
-		if (InteractionComponent->RightControllerActive) {
-			if (InteractionComponent->TraceForUI(RightControllerRoot, LaserEnd, HitComponent)) {
-				PS_RightControllerBeam->SetBeamSourcePoint(0, RightControllerRoot->GetComponentLocation(), 0);
-				PS_RightControllerBeam->SetBeamEndPoint(0, LaserEnd);
-				if (PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(false);
-				if (!PS_RightControllerBeam->bVisible) PS_RightControllerBeam->SetVisibility(true);
-			}
-			else {
-				if (PS_RightControllerBeam->bVisible) PS_RightControllerBeam->SetVisibility(false);
-			}
-		}else if (!InteractionComponent->RightControllerActive) {
-			if (InteractionComponent->TraceForUI(LeftControllerRoot, LaserEnd, HitComponent)) {
-				PS_LeftControllerBeam->SetBeamSourcePoint(0, LeftControllerRoot->GetComponentLocation(), 0);
-				PS_LeftControllerBeam->SetBeamEndPoint(0, LaserEnd);
-				if (PS_RightControllerBeam->bVisible) PS_RightControllerBeam->SetVisibility(false);
-				if (!PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(true);
-			}else {
-				if (PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(false);
-			}
-		}
-	}
+	if (bEnableLaserInput) UpdateLaser();
 }
 
 // Called to bind functionality to input
 void AGenericVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	PlayerInputComponent->BindAction("LeftTrigger", EInputEvent::IE_Pressed, this, &AGenericVRPawn::LeftTriggerDown);
+	PlayerInputComponent->BindAction("RightTrigger", EInputEvent::IE_Pressed, this, &AGenericVRPawn::RightTriggerDown);
 }
 
 void AGenericVRPawn::FirstTimeSetActiveController()
 {
 	if (!InteractionComponent) return;
-	FVector V;
-	USceneComponent* C;
-	if (InteractionComponent->TraceForUI(LeftControllerRoot, V, C)) {
-		InteractionComponent->SetRightLaserActive(true);
+	if (InteractionComponent->TraceForUI(LeftControllerRoot)) {
+		InteractionComponent->SetRightLaserActive(false);
 		InteractionComponent->ControllerFirstTimeActive = false;
-	}else if (InteractionComponent->TraceForUI(RightControllerRoot, V, C)) {
+	}else if (InteractionComponent->TraceForUI(RightControllerRoot)) {
 		InteractionComponent->SetRightLaserActive(true);
 		InteractionComponent->ControllerFirstTimeActive = false;
 	}
@@ -102,7 +78,49 @@ void AGenericVRPawn::UpdateMotionControllerPositions()
 	RightControllerRoot->SetRelativeTransform(FTransform(RRot, RPos, FVector(1, 1, 1)));
 }
 
+void AGenericVRPawn::UpdateLaser()
+{
+	if (InteractionComponent->ControllerFirstTimeActive) FirstTimeSetActiveController();
+	else {
+		FHitResult HitResult;
+		if (InteractionComponent->RightControllerActive) {
+			if (InteractionComponent->TraceForUI(RightControllerRoot, HitResult)) {
+				PS_RightControllerBeam->SetBeamSourcePoint(0, RightControllerRoot->GetComponentLocation(), 0);
+				PS_RightControllerBeam->SetBeamEndPoint(0, InteractionComponent->GetBeamEndPoint(RightControllerRoot, HitResult));
+				if (PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(false);
+				if (!PS_RightControllerBeam->bVisible) PS_RightControllerBeam->SetVisibility(true);
+			}
+			else {
+				if (PS_RightControllerBeam->bVisible) PS_RightControllerBeam->SetVisibility(false);
+			}
+		}
+		else if (!InteractionComponent->RightControllerActive) {
+			if (InteractionComponent->TraceForUI(LeftControllerRoot, HitResult)) {
+				PS_LeftControllerBeam->SetBeamSourcePoint(0, LeftControllerRoot->GetComponentLocation(), 0);
+				PS_LeftControllerBeam->SetBeamEndPoint(0, InteractionComponent->GetBeamEndPoint(LeftControllerRoot, HitResult));
+				if (PS_RightControllerBeam->bVisible) PS_RightControllerBeam->SetVisibility(false);
+				if (!PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(true);
+			}
+			else {
+				if (PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(false);
+			}
+		}
+	}
+}
+
 void AGenericVRPawn::LeftTriggerDown()
 {
+	if (!InteractionComponent) return;
+	if (InteractionComponent->TraceForUI(LeftControllerRoot) && InteractionComponent->RightControllerActive) {
+		InteractionComponent->SetRightLaserActive(false);
+	}
+}
+
+void AGenericVRPawn::RightTriggerDown()
+{
+	if (!InteractionComponent) return;
+	if (InteractionComponent->TraceForUI(RightControllerRoot) && !InteractionComponent->RightControllerActive) {
+		InteractionComponent->SetRightLaserActive(true);
+	}
 }
 

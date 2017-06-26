@@ -40,7 +40,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn|Motion Controllers")
 	//If true, will enable laser pointer input
-	bool bUseLaserPointer = true;
+	bool bEnableLaserInput = true;
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn|Motion Controllers|Controller Options", meta = (EditCondition = "bUseMotionControllers"))
 	//If true, Left Controller will be enabled.
@@ -101,8 +101,14 @@ private:
 	//Update postion of motion controllers
 	void UpdateMotionControllerPositions();
 
+	//Update Laser Status
+	void UpdateLaser();
+
 	UFUNCTION()
 	void LeftTriggerDown();
+
+	UFUNCTION()
+	void RightTriggerDown();
 
 	
 

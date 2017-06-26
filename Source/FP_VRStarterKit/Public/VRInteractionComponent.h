@@ -34,11 +34,15 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	bool RightControllerActive = false;
 
-	UFUNCTION(BlueprintCallable, Category = "VR Interaction Component Functions")
-	bool TraceForUI(USceneComponent* LaserSource, FVector& OutHitPoint, USceneComponent*& OutHitComponent);
+	bool TraceForUI(USceneComponent* LaserSource);
+
+	bool TraceForUI(USceneComponent* LaserSource, FHitResult &OutHitResult);
 
 	UFUNCTION(BlueprintCallable, Category = "VR Interaction Component Functions")
 	void SetRightLaserActive(bool newActive);
+
+	UFUNCTION(BlueprintCallable, Category = "VR Interaction Component Functions")
+	FVector GetBeamEndPoint(USceneComponent* LaserSource, FHitResult HitResult);
 
 	USceneComponent* HitComponent = nullptr;
 

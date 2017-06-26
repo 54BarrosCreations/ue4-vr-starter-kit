@@ -32,7 +32,7 @@ void UVRInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-bool UVRInteractionComponent::TraceForUI(USceneComponent* LaserSource, FVector& OutHitPoint, USceneComponent*& OutHitComponent)
+bool UVRInteractionComponent::TraceForUI(USceneComponent * LaserSource)
 {
 	//Setup Query Parameters
 	FCollisionQueryParams TraceParameters(FName(TEXT(" ")), false, ParentPawn);
@@ -50,25 +50,60 @@ bool UVRInteractionComponent::TraceForUI(USceneComponent* LaserSource, FVector& 
 		TraceParameters
 	);
 
-	//Check for a hit, and pass relevant information to our out parameters
+	//Check for a hit, returning if there is a valid ui hit
 	if (HitResult.bBlockingHit) {
-		OutHitPoint = HitResult.ImpactPoint;
-		OutHitComponent = HitResult.GetComponent();
-
-		if (!OutHitComponent) return false; //<--Return if there is a hit, but no hit component, because something went horribly wrong.
-		if (OutHitComponent->IsA<UVRWidgetComponent>() || OutHitComponent->IsA<UWidgetComponent>()) return true;
+		auto lHitComponent = HitResult.Component;
+		if (!lHitComponent.IsValid()) return false; //<--Return if there is a hit, but no hit component, because something went horribly wrong.
+		if (lHitComponent->IsA<UVRWidgetComponent>() || lHitComponent->IsA<UWidgetComponent>()) return true;
 		else return false;
 	}
 
-	//Set out params to default values if there is no hit
-	OutHitPoint = FVector(((LaserSource->GetForwardVector() + LaserSource->GetComponentRotation().Vector()) * ParentPawn->LaserDrawDistance) + LaserSource->GetComponentLocation());
-	OutHitComponent = nullptr;
 	return false;
+}
+
+bool UVRInteractionComponent::TraceForUI(USceneComponent* LaserSource, FHitResult &OutHitResult)
+{
+	//Setup Query Parameters
+	FCollisionQueryParams TraceParameters(FName(TEXT(" ")), false, ParentPawn);
+	FHitResult HitResult;
+
+	//Trace for ui hit
+	auto W = GetWorld();
+	if (!W || !ParentPawn) return false;
+
+	GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		LaserSource->GetComponentLocation(),
+		FVector(((LaserSource->GetForwardVector() + LaserSource->GetComponentRotation().Vector()) * ParentPawn->LaserDrawDistance) + LaserSource->GetComponentLocation()),
+		ECollisionChannel::ECC_Visibility,
+		TraceParameters
+	);
+
+	//Out Parameter
+	OutHitResult = HitResult;
+
+	//Check for a hit, return true if a valid ui hit
+	if (HitResult.bBlockingHit) {
+		auto lHitComponent = HitResult.Component;
+		if (!lHitComponent.IsValid()) return false; //<--Return if there is a hit, but no hit component, because something went horribly wrong.
+		if (lHitComponent->IsA<UVRWidgetComponent>() || lHitComponent->IsA<UWidgetComponent>()) return true;
+		else return false;
+	}else return false;
 }
 
 void UVRInteractionComponent::SetRightLaserActive(bool newActive)
 {
 	RightControllerActive = newActive;
+}
+
+FVector UVRInteractionComponent::GetBeamEndPoint(USceneComponent * LaserSource, FHitResult HitResult)
+{
+	if (!ParentPawn) return FVector::ZeroVector;
+	if (HitResult.bBlockingHit) {
+		return HitResult.ImpactPoint;
+	}else {
+		return FVector(((LaserSource->GetForwardVector() + LaserSource->GetComponentRotation().Vector()) * ParentPawn->LaserDrawDistance) + LaserSource->GetComponentLocation());
+	}
 }
 
 void UVRInteractionComponent::GetParentPawnAndComponents()
