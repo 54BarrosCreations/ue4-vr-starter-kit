@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GenericVRPawn.h"
+#include "VRWidgetComponent.h"
 
 // Sets default values
 AGenericVRPawn::AGenericVRPawn()
@@ -111,16 +112,28 @@ void AGenericVRPawn::UpdateLaser()
 void AGenericVRPawn::LeftTriggerDown()
 {
 	if (!InteractionComponent) return;
-	if (InteractionComponent->TraceForUI(LeftControllerRoot) && InteractionComponent->RightControllerActive) {
+	if (InteractionComponent->RightControllerActive && InteractionComponent->TraceForUI(LeftControllerRoot)) {
 		InteractionComponent->SetRightLaserActive(false);
+	} else {
+		if (InteractionComponent->HitComponent) {
+			if (InteractionComponent->HitComponent->IsA<UVRWidgetComponent>()) {
+				Cast<UVRWidgetComponent>(InteractionComponent->HitComponent)->MotionControllerTriggerDown.Broadcast(this, InteractionComponent);
+			}
+		}
 	}
 }
 
 void AGenericVRPawn::RightTriggerDown()
 {
 	if (!InteractionComponent) return;
-	if (InteractionComponent->TraceForUI(RightControllerRoot) && !InteractionComponent->RightControllerActive) {
+	if (!InteractionComponent->RightControllerActive && InteractionComponent->TraceForUI(RightControllerRoot)) {
 		InteractionComponent->SetRightLaserActive(true);
+	} else {
+		if (InteractionComponent->HitComponent) {
+			if (InteractionComponent->HitComponent->IsA<UVRWidgetComponent>()) {
+				Cast<UVRWidgetComponent>(InteractionComponent->HitComponent)->MotionControllerTriggerDown.Broadcast(this, InteractionComponent);
+			}
+		}
 	}
 }
 
