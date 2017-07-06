@@ -50,14 +50,35 @@ bool UVRInteractionComponent::TraceForUI(USceneComponent * LaserSource)
 		TraceParameters
 	);
 
-	//Check for a hit, returning if there is a valid ui hit
+	//Check for a hit, return true if a valid ui hit
 	if (HitResult.bBlockingHit) {
-		auto lHitComponent = HitResult.Component;
-		if (!lHitComponent.IsValid()) return false; //<--Return if there is a hit, but no hit component, because something went horribly wrong.
-		if (lHitComponent->IsA<UVRWidgetComponent>() || lHitComponent->IsA<UWidgetComponent>()) return true;
-		else return false;
+		auto lHitComponent = HitResult.GetComponent();
+		if (!lHitComponent) return false; //<--Return if there is a hit, but no hit component, because something went horribly wrong.
+		if (lHitComponent->IsA<UVRWidgetComponent>() || lHitComponent->IsA<UWidgetComponent>()) {
+			HitComponent = lHitComponent;
+			if (HitComponent->IsA<UVRWidgetComponent>()) {
+				if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
+				SelectedWidget = Cast<UVRWidgetComponent>(HitComponent);
+				SelectedWidget->HighlightWidget.Broadcast(ParentPawn, this);
+			}
+			else {
+				if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
+				SelectedWidget = nullptr;
+				HitComponent = lHitComponent;
+			}
+
+			return true;
+		}
+
+		if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
+		SelectedWidget = nullptr;
+		HitComponent = lHitComponent;
+		return false;
 	}
 
+	if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
+	SelectedWidget = nullptr;
+	HitComponent = nullptr;
 	return false;
 }
 
@@ -84,11 +105,29 @@ bool UVRInteractionComponent::TraceForUI(USceneComponent* LaserSource, FHitResul
 
 	//Check for a hit, return true if a valid ui hit
 	if (HitResult.bBlockingHit) {
-		auto lHitComponent = HitResult.Component;
-		if (!lHitComponent.IsValid()) return false; //<--Return if there is a hit, but no hit component, because something went horribly wrong.
-		if (lHitComponent->IsA<UVRWidgetComponent>() || lHitComponent->IsA<UWidgetComponent>()) return true;
-		else return false;
-	}else return false;
+		auto lHitComponent = HitResult.GetComponent();
+		if (!lHitComponent) return false; //<--Return if there is a hit, but no hit component, because something went horribly wrong.
+		if (lHitComponent->IsA<UVRWidgetComponent>() || lHitComponent->IsA<UWidgetComponent>()) {
+			HitComponent = lHitComponent;
+			if (HitComponent->IsA<UVRWidgetComponent>()) {
+				if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
+				SelectedWidget = Cast<UVRWidgetComponent>(HitComponent);
+				SelectedWidget->HighlightWidget.Broadcast(ParentPawn, this);
+			}
+
+			return true;
+		}
+		
+		if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
+		SelectedWidget = nullptr;
+		HitComponent = lHitComponent;
+		return false;
+	}
+
+	if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
+	SelectedWidget = nullptr;
+	HitComponent = nullptr;
+	return false;
 }
 
 void UVRInteractionComponent::SetRightLaserActive(bool newActive)

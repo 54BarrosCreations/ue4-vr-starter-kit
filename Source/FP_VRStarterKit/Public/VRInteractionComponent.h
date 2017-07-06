@@ -7,6 +7,7 @@
 #include "VRInteractionComponent.generated.h"
 
 class UWidgetComponent;
+class UVRWidgetComponent;
 class AGenericVRPawn;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -45,6 +46,7 @@ public:
 	FVector GetBeamEndPoint(USceneComponent* LaserSource, FHitResult HitResult);
 
 	USceneComponent* HitComponent = nullptr;
+	UVRWidgetComponent* SelectedWidget = nullptr;
 
 private:
 

@@ -18,6 +18,8 @@ class FP_VRSTARTERKIT_API UVRWidgetComponent : public UWidgetComponent
 {
 	GENERATED_BODY()
 	
+public:
+
 	UPROPERTY(BlueprintAssignable, Category = Events)
 	FWidgetEvent MotionControllerTriggerDown;
 
