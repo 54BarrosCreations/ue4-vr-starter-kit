@@ -54,19 +54,11 @@ bool UVRInteractionComponent::TraceForUI(USceneComponent * LaserSource)
 	if (HitResult.bBlockingHit) {
 		auto lHitComponent = HitResult.GetComponent();
 		if (!lHitComponent) return false; //<--Return if there is a hit, but no hit component, because something went horribly wrong.
-		if (lHitComponent->IsA<UVRWidgetComponent>() || lHitComponent->IsA<UWidgetComponent>()) {
+		if (lHitComponent->IsA<UVRWidgetComponent>()) {
 			HitComponent = lHitComponent;
-			if (HitComponent->IsA<UVRWidgetComponent>()) {
-				if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
-				SelectedWidget = Cast<UVRWidgetComponent>(HitComponent);
-				SelectedWidget->HighlightWidget.Broadcast(ParentPawn, this);
-			}
-			else {
-				if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
-				SelectedWidget = nullptr;
-				HitComponent = lHitComponent;
-			}
-
+			if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
+			SelectedWidget = Cast<UVRWidgetComponent>(HitComponent);
+			SelectedWidget->HighlightWidget.Broadcast(ParentPawn, this);
 			return true;
 		}
 
@@ -107,14 +99,11 @@ bool UVRInteractionComponent::TraceForUI(USceneComponent* LaserSource, FHitResul
 	if (HitResult.bBlockingHit) {
 		auto lHitComponent = HitResult.GetComponent();
 		if (!lHitComponent) return false; //<--Return if there is a hit, but no hit component, because something went horribly wrong.
-		if (lHitComponent->IsA<UVRWidgetComponent>() || lHitComponent->IsA<UWidgetComponent>()) {
+		if (lHitComponent->IsA<UVRWidgetComponent>()) {
 			HitComponent = lHitComponent;
-			if (HitComponent->IsA<UVRWidgetComponent>()) {
-				if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
-				SelectedWidget = Cast<UVRWidgetComponent>(HitComponent);
-				SelectedWidget->HighlightWidget.Broadcast(ParentPawn, this);
-			}
-
+			if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentPawn, this);
+			SelectedWidget = Cast<UVRWidgetComponent>(HitComponent);
+			SelectedWidget->HighlightWidget.Broadcast(ParentPawn, this);
 			return true;
 		}
 		
