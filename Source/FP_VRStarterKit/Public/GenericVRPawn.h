@@ -96,10 +96,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Generic VR Pawn Functions")
 	void FirstTimeSetActiveController();
 
-private:
-
+	UFUNCTION(NetMulticast, Reliable, Category ="Generic VR Pawn Functions")
 	//Update postion of motion controllers
 	void UpdateMotionControllerPositions();
+
+private:
 
 	//Update Laser Status
 	void UpdateLaser();

@@ -38,7 +38,7 @@ void AGenericVRPawn::BeginPlay()
 void AGenericVRPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (bUseMotionControllers) UpdateMotionControllerPositions();
+	if (bUseMotionControllers) UpdateMotionControllerPositions_Implementation();
 	if (bEnableLaserInput) UpdateLaser();
 }
 
@@ -62,7 +62,7 @@ void AGenericVRPawn::FirstTimeSetActiveController()
 	}
 }
 
-void AGenericVRPawn::UpdateMotionControllerPositions()
+void AGenericVRPawn::UpdateMotionControllerPositions_Implementation()
 {
 	if (!LeftControllerRoot || !RightControllerRoot) return;
 
