@@ -9,6 +9,7 @@
 class UWidgetComponent;
 class UVRWidgetComponent;
 class AGenericVRPawn;
+class AGenericVRCharacter;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FP_VRSTARTERKIT_API UVRInteractionComponent : public UActorComponent
@@ -29,6 +30,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	AGenericVRPawn* ParentPawn = nullptr;
+
+	UPROPERTY(BlueprintReadOnly)
+	AGenericVRCharacter* ParentCharacter = nullptr;
 
 	bool ControllerFirstTimeActive = true;
 
