@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine.h"
+#include "VRCharacterInteractionComponent.h"
 #include "MotionControllerComponent.h"
-#include "VRInteractionComponent.h"
 #include "SteamVRFunctionLibrary.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "HeadMountedDisplay.h"
@@ -40,6 +40,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers")
 	bool bUseLaserInteraction = true;
 
+	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers", meta = (EditCondition = "bUseLaserInteraction"))
+	float LaserDrawDistance = 5000.f;
+
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Inherited Components~~ 
 	UPROPERTY(VisibleDefaultsOnly)
@@ -60,14 +63,14 @@ public:
 	UPROPERTY(VisibleDefaultsOnly)
 	USceneComponent* RightMotionControllerRoot = nullptr;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
-	UVRInteractionComponent* InteractionComponent = nullptr;
-
 	UPROPERTY(VisibleDefaultsOnly)
 	UParticleSystemComponent* PS_LeftControllerBeam = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
 	UParticleSystemComponent* PS_RightControllerBeam = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UVRCharacterInteractionComponent* InteractionComponent = nullptr;
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Functions~~ 

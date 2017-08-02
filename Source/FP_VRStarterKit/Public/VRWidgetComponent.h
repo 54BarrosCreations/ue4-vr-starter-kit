@@ -8,16 +8,16 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~Forward Declarations
-class AGenericVRPawn;
-class UVRInteractionComponent;
+class AGenericVRCharacter;
+class UVRCharacterInteractionComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWidgetEvent, AGenericVRPawn*, CallingPawn, UVRInteractionComponent*, InteractionComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWidgetEvent, AGenericVRCharacter*, CallingPawn, UVRCharacterInteractionComponent*, InteractionComponent);
 
 UCLASS(ClassGroup = (Interaction), meta = (BlueprintSpawnableComponent))
 class FP_VRSTARTERKIT_API UVRWidgetComponent : public UWidgetComponent
 {
 	GENERATED_BODY()
-	
+
 public:
 
 	UPROPERTY(BlueprintAssignable, Category = Events)
@@ -36,6 +36,6 @@ public:
 	FWidgetEvent DeselectWidget;
 
 
-	
-	
+
+
 };

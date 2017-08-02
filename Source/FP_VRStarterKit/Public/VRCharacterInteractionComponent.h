@@ -37,6 +37,18 @@ public:
 	bool bRightControllerActive = false;
 	
 	UFUNCTION(BlueprintCallable, Category = "Interaction Component Functions")
-	bool TraceForUI(USceneComponent* TraceStart, FVector TraceEnd, FHitResult &OutHitResult);
+	bool TraceForUI(USceneComponent* TraceStart, FHitResult &OutHitResult);
+
+	UFUNCTION(BlueprintCallable, Category = "Interaction Component Functions")
+	FVector GetTraceEndPoint(USceneComponent* LaserSource);
+
+	UFUNCTION(BlueprintCallable, Category = "Interaction Component Functions")
+	FVector GetLaserBeamEndPoint(USceneComponent* LaserSource, FHitResult HitResult);
+
+	UPROPERTY(BlueprintReadOnly)
+	UVRWidgetComponent* SelectedWidget = nullptr;
+
+private:
+	void GetParentCharacter();
 	
 };
