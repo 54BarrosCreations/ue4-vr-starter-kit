@@ -48,6 +48,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UVRWidgetComponent* SelectedWidget = nullptr;
 
+	UPROPERTY(BlueprintReadOnly)
+	UPrimitiveComponent* TraceHitResultComponent = nullptr;
+
 private:
 	void GetParentCharacter();
 	

@@ -58,10 +58,10 @@ public:
 	UCameraComponent* VRCameraOrigin = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
-	USceneComponent* LeftMotionControllerRoot = nullptr;
+	UMotionControllerComponent* LeftMotionControllerRoot = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
-	USceneComponent* RightMotionControllerRoot = nullptr;
+	UMotionControllerComponent* RightMotionControllerRoot = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
 	UParticleSystemComponent* PS_LeftControllerBeam = nullptr;
@@ -83,5 +83,29 @@ public:
 
 	UFUNCTION()
 	void UpdateLaser();
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Controller Events~~
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VR Character Controller Events")
+	void LeftMotionControllerTriggerDown(UVRCharacterInteractionComponent* VRInteractionComponent);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VR Character Controller Events")
+	void LeftMotionControllerTriggerUp(UVRCharacterInteractionComponent* VRInteractionComponent);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VR Character Controller Events")
+	void RightMotionControllerTriggerDown(UVRCharacterInteractionComponent* VRInteractionComponent);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VR Character Controller Events")
+	void RightMotionControllerTriggerUp(UVRCharacterInteractionComponent* VRInteractionComponent);
+
+private:
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Input~~
+	void LeftTriggerDown();
+	void LeftTriggerUp();
+	void RightTriggerDown();
+	void RightTriggerUp();
 	
 };

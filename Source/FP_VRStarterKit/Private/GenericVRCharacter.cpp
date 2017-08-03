@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GenericVRCharacter.h"
+#include "VRWidgetComponent.h"
 
 
 // Sets default values
@@ -18,19 +19,22 @@ AGenericVRCharacter::AGenericVRCharacter(const FObjectInitializer& ObjectInitial
 	GetCapsuleComponent()->SetupAttachment(VRCameraOrigin);
 
 	//Left Motion Controller
-	LeftMotionControllerRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Left Controller"));
+	LeftMotionControllerRoot = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Left Controller"));
 	LeftMotionControllerRoot->SetupAttachment(VROrigin);
 	LeftMotionControllerRoot->SetIsReplicated(true);
+	LeftMotionControllerRoot->Hand = EControllerHand::Left;
 	PS_LeftControllerBeam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Left Controller Beam"));
 	PS_LeftControllerBeam->SetupAttachment(LeftMotionControllerRoot);
 
 	//Right Motion Controller
-	RightMotionControllerRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Right Controller"));
+	RightMotionControllerRoot = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Right Controller"));
 	RightMotionControllerRoot->SetupAttachment(VROrigin);
 	RightMotionControllerRoot->SetIsReplicated(true);
+	RightMotionControllerRoot->Hand = EControllerHand::Right;
 	PS_RightControllerBeam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Right Controller Beam"));
 	PS_RightControllerBeam->SetupAttachment(RightMotionControllerRoot);
 
+	//Interaction Component
 	InteractionComponent = CreateDefaultSubobject<UVRCharacterInteractionComponent>(TEXT("Interaction Component"));
 }
 
@@ -44,7 +48,7 @@ void AGenericVRCharacter::BeginPlay()
 void AGenericVRCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (IsLocallyControlled())	UpdateMotionControllerPositions();
+	//if (IsLocallyControlled())	UpdateMotionControllerPositions();
 	if (bUseLaserInteraction)	UpdateLaser();
 }
 
@@ -52,7 +56,10 @@ void AGenericVRCharacter::Tick(float DeltaTime)
 void AGenericVRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	PlayerInputComponent->BindAction("LeftTrigger", EInputEvent::IE_Pressed, this, &AGenericVRCharacter::LeftTriggerDown);
+	PlayerInputComponent->BindAction("LeftTrigger", EInputEvent::IE_Released, this, &AGenericVRCharacter::LeftTriggerUp);
+	PlayerInputComponent->BindAction("RightTrigger", EInputEvent::IE_Pressed, this, &AGenericVRCharacter::RightTriggerDown);
+	PlayerInputComponent->BindAction("RightTrigger", EInputEvent::IE_Released, this, &AGenericVRCharacter::RightTriggerUp);
 }
 
 void AGenericVRCharacter::SetInitialActiveController()
@@ -112,5 +119,56 @@ void AGenericVRCharacter::UpdateLaser()
 			}
 		}
 	}
+}
+
+void AGenericVRCharacter::LeftTriggerDown()
+{
+	if (!InteractionComponent) return;
+
+	//Check for UI Interaction
+	if (InteractionComponent->bRightControllerActive) {
+		FHitResult HitResult;
+		if (InteractionComponent->TraceForUI(LeftMotionControllerRoot, HitResult)) InteractionComponent->bRightControllerActive = false;
+	} else {
+		if (InteractionComponent->TraceHitResultComponent) {
+			if (InteractionComponent->TraceHitResultComponent->IsA<UVRWidgetComponent>()) {
+				Cast<UVRWidgetComponent>(InteractionComponent->TraceHitResultComponent)->MotionControllerTriggerDown.Broadcast(this, InteractionComponent);
+			}
+		}
+	}
+
+	//Call blueprint event
+	LeftMotionControllerTriggerDown(InteractionComponent);
+}
+
+void AGenericVRCharacter::LeftTriggerUp()
+{
+	LeftMotionControllerTriggerUp(InteractionComponent);
+}
+
+void AGenericVRCharacter::RightTriggerDown()
+{
+	if (!InteractionComponent) return;
+
+	//Check for UI Interaction
+	if (!InteractionComponent->bRightControllerActive) {
+		FHitResult HitResult;
+		if (InteractionComponent->TraceForUI(RightMotionControllerRoot, HitResult)) InteractionComponent->bRightControllerActive = true;
+	}
+	else {
+		if (InteractionComponent->TraceHitResultComponent) {
+			if (InteractionComponent->TraceHitResultComponent->IsA<UVRWidgetComponent>()) {
+				Cast<UVRWidgetComponent>(InteractionComponent->TraceHitResultComponent)->MotionControllerTriggerDown.Broadcast(this, InteractionComponent);
+			}
+		}
+	}
+
+	//Call blueprint event
+	RightMotionControllerTriggerDown(InteractionComponent);
+}
+
+void AGenericVRCharacter::RightTriggerUp()
+{
+	RightMotionControllerTriggerUp(InteractionComponent);
 }
 

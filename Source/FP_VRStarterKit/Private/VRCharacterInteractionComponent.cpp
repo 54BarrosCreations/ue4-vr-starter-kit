@@ -3,6 +3,7 @@
 #include "VRCharacterInteractionComponent.h"
 #include "GenericVRCharacter.h"
 #include "VRWidgetComponent.h"
+#include "Runtime/UMG/Public/Components/WidgetComponent.h"
 
 
 // Sets default values for this component's properties
@@ -38,6 +39,8 @@ bool UVRCharacterInteractionComponent::TraceForUI(USceneComponent * LaserSource,
 
 	//Params
 	FCollisionQueryParams TraceParameters;
+	TraceParameters.AddIgnoredActor(ParentCharacter);
+	TraceParameters.bTraceComplex = false;
 	FHitResult HitResult;
 
 	//Trace for ui hit
@@ -48,13 +51,27 @@ bool UVRCharacterInteractionComponent::TraceForUI(USceneComponent * LaserSource,
 		ECollisionChannel::ECC_Visibility,
 		TraceParameters)) {
 		auto hitComponent = OutHitResult.GetComponent();
+		TraceHitResultComponent = hitComponent;
 		if (hitComponent->IsA<UVRWidgetComponent>()) {
 			if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentCharacter, this);
 			SelectedWidget = Cast<UVRWidgetComponent>(hitComponent);
+			SelectedWidget->HighlightWidget.Broadcast(ParentCharacter, this);
+			return true;
+		} else if (hitComponent->IsA<UWidgetComponent>()) {
+			if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentCharacter, this);
+			SelectedWidget = nullptr;
+			return true;
+		}
+		else {
+			if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentCharacter, this);
+			SelectedWidget = nullptr;
+			return false;
 		}
 	}
 	
-	
+	if (SelectedWidget) SelectedWidget->DeselectWidget.Broadcast(ParentCharacter, this);
+	SelectedWidget = nullptr;
+	TraceHitResultComponent = nullptr;
 	return false;
 }
 
