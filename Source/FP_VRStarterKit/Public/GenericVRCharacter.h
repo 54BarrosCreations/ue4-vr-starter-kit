@@ -58,10 +58,10 @@ public:
 	UCameraComponent* VRCameraOrigin = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
-	UMotionControllerComponent* LeftMotionControllerRoot = nullptr;
+	USceneComponent* LeftMotionControllerRoot = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
-	UMotionControllerComponent* RightMotionControllerRoot = nullptr;
+	USceneComponent* RightMotionControllerRoot = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
 	UParticleSystemComponent* PS_LeftControllerBeam = nullptr;

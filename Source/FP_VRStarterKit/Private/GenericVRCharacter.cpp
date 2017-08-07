@@ -19,18 +19,16 @@ AGenericVRCharacter::AGenericVRCharacter(const FObjectInitializer& ObjectInitial
 	GetCapsuleComponent()->SetupAttachment(VRCameraOrigin);
 
 	//Left Motion Controller
-	LeftMotionControllerRoot = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Left Controller"));
+	LeftMotionControllerRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Left Controller"));
 	LeftMotionControllerRoot->SetupAttachment(VROrigin);
 	LeftMotionControllerRoot->SetIsReplicated(true);
-	LeftMotionControllerRoot->Hand = EControllerHand::Left;
 	PS_LeftControllerBeam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Left Controller Beam"));
 	PS_LeftControllerBeam->SetupAttachment(LeftMotionControllerRoot);
 
 	//Right Motion Controller
-	RightMotionControllerRoot = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Right Controller"));
+	RightMotionControllerRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Right Controller"));
 	RightMotionControllerRoot->SetupAttachment(VROrigin);
 	RightMotionControllerRoot->SetIsReplicated(true);
-	RightMotionControllerRoot->Hand = EControllerHand::Right;
 	PS_RightControllerBeam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Right Controller Beam"));
 	PS_RightControllerBeam->SetupAttachment(RightMotionControllerRoot);
 
@@ -48,7 +46,7 @@ void AGenericVRCharacter::BeginPlay()
 void AGenericVRCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//if (IsLocallyControlled())	UpdateMotionControllerPositions();
+	if (IsLocallyControlled())	UpdateMotionControllerPositions();
 	if (bUseLaserInteraction)	UpdateLaser();
 }
 
