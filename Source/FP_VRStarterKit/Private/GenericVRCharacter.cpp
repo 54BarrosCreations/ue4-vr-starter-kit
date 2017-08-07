@@ -40,6 +40,7 @@ AGenericVRCharacter::AGenericVRCharacter(const FObjectInitializer& ObjectInitial
 void AGenericVRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	InitializeHMD();
 }
 
 // Called every frame
@@ -168,5 +169,22 @@ void AGenericVRCharacter::RightTriggerDown()
 void AGenericVRCharacter::RightTriggerUp()
 {
 	RightMotionControllerTriggerUp(InteractionComponent);
+}
+
+void AGenericVRCharacter::InitializeHMD()
+{
+	HMD = GEngine->HMDDevice->GetHMDDeviceType();
+
+	switch (HMD) {
+		case EHMDDeviceType::DT_SteamVR:
+			UE_LOG(LogTemp, Warning, TEXT("Connected HMD: SteamVR"));
+			break;
+		case EHMDDeviceType::DT_OculusRift:
+			UE_LOG(LogTemp, Warning, TEXT("Connected HMD: Oculus Rift"));
+			break;
+		default:
+			UE_LOG(LogTemp, Warning, TEXT("Invalid HMD Type: Currently the VR Starter Kit only supports SteamVR and OculusRift"));
+			break;
+	}
 }
 

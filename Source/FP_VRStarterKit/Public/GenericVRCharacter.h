@@ -9,6 +9,7 @@
 #include "SteamVRFunctionLibrary.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "HeadMountedDisplay.h"
+#include "Runtime/HeadMountedDisplay/Public/HeadMountedDisplayTypes.h"
 #include "GameFramework/Character.h"
 #include "GenericVRCharacter.generated.h"
 
@@ -31,6 +32,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	EHMDDeviceType::Type HMD;
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~VR Character Options~~
@@ -107,5 +110,10 @@ private:
 	void LeftTriggerUp();
 	void RightTriggerDown();
 	void RightTriggerUp();
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~VR Setup~~
+
+	void InitializeHMD();
 	
 };
