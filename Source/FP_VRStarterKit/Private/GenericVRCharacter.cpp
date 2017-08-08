@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GenericVRCharacter.h"
+#include "VRStarterKitErrorMessages.h"
 #include "VRWidgetComponent.h"
 
 
@@ -43,6 +44,7 @@ void AGenericVRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	InitializeHMD();
+	GetOptionalComponents();
 }
 
 // Called every frame
@@ -122,6 +124,16 @@ void AGenericVRCharacter::UpdateLaser()
 	}
 }
 
+bool AGenericVRCharacter::GrabObject_Implementation(AActor* ActorToGrab)
+{
+	return true;
+}
+
+bool AGenericVRCharacter::ReleaseObject_Implementation()
+{
+	return true;
+}
+
 void AGenericVRCharacter::LeftTriggerDown()
 {
 	if (!InteractionComponent) return;
@@ -179,14 +191,30 @@ void AGenericVRCharacter::InitializeHMD()
 
 	switch (HMD) {
 		case EHMDDeviceType::DT_SteamVR:
-			UE_LOG(LogTemp, Warning, TEXT("Connected HMD: SteamVR"));
+			LogWarning("HMD Connected: SteamVR");
 			break;
 		case EHMDDeviceType::DT_OculusRift:
-			UE_LOG(LogTemp, Warning, TEXT("Connected HMD: Oculus Rift"));
+			LogWarning("HMD Connected: Oculus Rift");
 			break;
 		default:
-			UE_LOG(LogTemp, Warning, TEXT("Invalid HMD Type: Currently the VR Starter Kit only supports SteamVR and OculusRift"));
+			LogWarning("Invalid HMD Type: Currently the VR Starter Kit only supports SteamVR and OculusRift");
 			break;
+	}
+}
+
+void AGenericVRCharacter::GetOptionalComponents()
+{
+	if (bAllowGripping) {
+		auto components = GetComponents();
+		for (UActorComponent* component : components) {
+			if (component->IsA<USphereComponent>()) {
+				if (component->ComponentHasTag("LeftGrabSphere")) GrabSphere_L = Cast<USphereComponent>(component);
+				else if (component->ComponentHasTag("RightGrabSphere")) GrabSphere_R = Cast<USphereComponent>(component);
+			}
+		}
+
+		if (!GrabSphere_L) LogError(GenerateVRErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "LeftGrabSphere"));
+		if (!GrabSphere_R) LogError(GenerateVRErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "RightGrabSphere"));
 	}
 }
 

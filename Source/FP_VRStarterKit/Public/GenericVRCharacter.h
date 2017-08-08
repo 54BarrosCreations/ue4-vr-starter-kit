@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine.h"
+#include "PickupObject.h"
 #include "VRCharacterInteractionComponent.h"
 #include "MotionControllerComponent.h"
 #include "SteamVRFunctionLibrary.h"
@@ -14,7 +15,7 @@
 #include "GenericVRCharacter.generated.h"
 
 UCLASS()
-class FP_VRSTARTERKIT_API AGenericVRCharacter : public ACharacter
+class FP_VRSTARTERKIT_API AGenericVRCharacter : public ACharacter, public IPickupObject
 {
 	GENERATED_BODY()
 
@@ -46,6 +47,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers", meta = (EditCondition = "bUseLaserInteraction"))
 	float LaserDrawDistance = 5000.f;
 
+	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers")
+	bool bAllowGripping = true;
+
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Inherited Components~~ 
 	UPROPERTY(VisibleDefaultsOnly)
@@ -76,6 +80,12 @@ public:
 	UVRCharacterInteractionComponent* InteractionComponent = nullptr;
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Optional Components~~ 
+
+	USphereComponent* GrabSphere_L = nullptr;
+	USphereComponent* GrabSphere_R = nullptr;
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Functions~~ 
 
 	UFUNCTION()
@@ -102,6 +112,17 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VR Character Controller Events")
 	void RightMotionControllerTriggerUp(UVRCharacterInteractionComponent* VRInteractionComponent);
 
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Pickup Functions~~
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Pickup Interface")
+		bool GrabObject(AActor* ActorToGrab);
+		virtual bool GrabObject_Implementation(AActor* ActorToGrab) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Pickup Interface")
+		bool ReleaseObject();
+		virtual bool ReleaseObject_Implementation() override;
+
 private:
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,5 +136,6 @@ private:
 	//~~VR Setup~~
 
 	void InitializeHMD();
+	void GetOptionalComponents();
 	
 };
