@@ -124,15 +124,6 @@ void AGenericVRCharacter::UpdateLaser()
 	}
 }
 
-bool AGenericVRCharacter::GrabObject_Implementation(AActor* ActorToGrab)
-{
-	return true;
-}
-
-bool AGenericVRCharacter::ReleaseObject_Implementation()
-{
-	return true;
-}
 
 void AGenericVRCharacter::LeftTriggerDown()
 {
@@ -161,19 +152,30 @@ void AGenericVRCharacter::LeftTriggerUp()
 
 void AGenericVRCharacter::RightTriggerDown()
 {
-	if (!InteractionComponent) return;
-
-	//Check for UI Interaction
-	if (!InteractionComponent->bRightControllerActive) {
-		FHitResult HitResult;
-		if (InteractionComponent->TraceForUI(RightMotionControllerRoot, HitResult)) InteractionComponent->bRightControllerActive = true;
-	}
-	else {
-		if (InteractionComponent->TraceHitResultComponent) {
-			if (InteractionComponent->TraceHitResultComponent->IsA<UVRWidgetComponent>()) {
-				Cast<UVRWidgetComponent>(InteractionComponent->TraceHitResultComponent)->MotionControllerTriggerDown.Broadcast(this, InteractionComponent);
+	//Check for Ui Interaction
+	if (bUseLaserInteraction && InteractionComponent) {
+		if (!InteractionComponent->bRightControllerActive) {
+			FHitResult HitResult;
+			if (InteractionComponent->TraceForUI(RightMotionControllerRoot, HitResult)) InteractionComponent->bRightControllerActive = true;
+		} else {
+			if (InteractionComponent->TraceHitResultComponent) {
+				if (InteractionComponent->TraceHitResultComponent->IsA<UVRWidgetComponent>()) {
+					Cast<UVRWidgetComponent>(InteractionComponent->TraceHitResultComponent)->MotionControllerTriggerDown.Broadcast(this, InteractionComponent);
+				}
 			}
 		}
+	}
+	
+	//Check for Grabbable actors
+	if (bAllowGripping && GrabSphere_R) {
+		TArray<AActor*> OverlappingActors;
+		GrabSphere_R->GetOverlappingActors(OverlappingActors);
+		AActor* NearestActor = GetClosestValidActor(OverlappingActors);
+		if (NearestActor) {
+			IPickupObject::Execute_GrabObject(NearestActor, RightMotionControllerRoot, false);
+		} else LogWarning("No Actors with interface found.");
+	}else if (bAllowGripping && !GrabSphere_R) {
+		LogError(GenerateErrorMessage(EVRErrorType::ET_FUNCTION_UNAVAILABLE_COMPONENT_ERROR, "Grab", "Right grab sphere missing."));
 	}
 
 	//Call blueprint event
@@ -183,6 +185,28 @@ void AGenericVRCharacter::RightTriggerDown()
 void AGenericVRCharacter::RightTriggerUp()
 {
 	RightMotionControllerTriggerUp(InteractionComponent);
+}
+
+AActor * AGenericVRCharacter::GetClosestValidActor(TArray<AActor*> InOverlappingActors)
+{
+	float nearest = 9999.0f;
+	AActor* NearestActor = nullptr;
+	if (InOverlappingActors.IsValidIndex(0)) {
+		for (AActor* actor : InOverlappingActors) {
+			float dist = GetDistanceTo(actor);
+			if (dist < nearest) {
+				NearestActor = actor;
+				nearest = dist;
+				
+			}
+		}
+		if (NearestActor) {
+			if (NearestActor->GetClass()->ImplementsInterface(UPickupObject::StaticClass())) return NearestActor;
+		}
+		else return nullptr;
+	}
+	
+	return nullptr;
 }
 
 void AGenericVRCharacter::InitializeHMD()
@@ -197,7 +221,7 @@ void AGenericVRCharacter::InitializeHMD()
 			LogWarning("HMD Connected: Oculus Rift");
 			break;
 		default:
-			LogWarning("Invalid HMD Type: Currently the VR Starter Kit only supports SteamVR and OculusRift");
+			LogError(GenerateErrorMessage(EVRErrorType::ET_CUSTOM_ERROR, "", "Invalid HMD Type : Currently the VR Starter Kit only supports SteamVR and OculusRift"));
 			break;
 	}
 }
@@ -213,8 +237,8 @@ void AGenericVRCharacter::GetOptionalComponents()
 			}
 		}
 
-		if (!GrabSphere_L) LogError(GenerateVRErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "LeftGrabSphere"));
-		if (!GrabSphere_R) LogError(GenerateVRErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "RightGrabSphere"));
+		if (!GrabSphere_L) LogError(GenerateErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "LeftGrabSphere"));
+		if (!GrabSphere_R) LogError(GenerateErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "RightGrabSphere"));
 	}
 }
 

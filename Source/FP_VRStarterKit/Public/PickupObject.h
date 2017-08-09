@@ -22,7 +22,7 @@ class FP_VRSTARTERKIT_API IPickupObject
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickup Interface")
-	bool GrabObject(AActor* ActorToGrab);
+	bool GrabObject(USceneComponent* AttachTo, bool SnapToCenter);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickup Interface")
 	bool ReleaseObject();

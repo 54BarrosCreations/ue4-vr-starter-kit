@@ -11,11 +11,12 @@
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "HeadMountedDisplay.h"
 #include "Runtime/HeadMountedDisplay/Public/HeadMountedDisplayTypes.h"
+#include "PickupObject.h"
 #include "GameFramework/Character.h"
 #include "GenericVRCharacter.generated.h"
 
 UCLASS()
-class FP_VRSTARTERKIT_API AGenericVRCharacter : public ACharacter, public IPickupObject
+class FP_VRSTARTERKIT_API AGenericVRCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -112,17 +113,6 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VR Character Controller Events")
 	void RightMotionControllerTriggerUp(UVRCharacterInteractionComponent* VRInteractionComponent);
 
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//~~Pickup Functions~~
-
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Pickup Interface")
-		bool GrabObject(AActor* ActorToGrab);
-		virtual bool GrabObject_Implementation(AActor* ActorToGrab) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Pickup Interface")
-		bool ReleaseObject();
-		virtual bool ReleaseObject_Implementation() override;
-
 private:
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -131,6 +121,11 @@ private:
 	void LeftTriggerUp();
 	void RightTriggerDown();
 	void RightTriggerUp();
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Gripping~~
+	AActor* GetClosestValidActor(TArray<AActor*> InOverlappingActors);
+	AActor* RightGrippedActor = nullptr;
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~VR Setup~~
