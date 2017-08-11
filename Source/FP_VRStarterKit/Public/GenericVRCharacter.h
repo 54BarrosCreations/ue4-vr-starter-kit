@@ -121,6 +121,10 @@ private:
 	void LeftTriggerUp();
 	void RightTriggerDown();
 	void RightTriggerUp();
+	void LeftGripDown();
+	void LeftGripUp();
+	void RightGripDown();
+	void RightGripUp();
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Gripping~~
