@@ -130,6 +130,7 @@ private:
 	//~~Gripping~~
 	AActor* GetClosestValidActor(TArray<AActor*> InOverlappingActors);
 	AActor* RightGrippedActor = nullptr;
+	AActor* LeftGrippedActor = nullptr;
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~VR Setup~~

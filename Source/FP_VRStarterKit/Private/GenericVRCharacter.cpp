@@ -63,6 +63,8 @@ void AGenericVRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("LeftTrigger", EInputEvent::IE_Released, this, &AGenericVRCharacter::LeftTriggerUp);
 	PlayerInputComponent->BindAction("RightTrigger", EInputEvent::IE_Pressed, this, &AGenericVRCharacter::RightTriggerDown);
 	PlayerInputComponent->BindAction("RightTrigger", EInputEvent::IE_Released, this, &AGenericVRCharacter::RightTriggerUp);
+	PlayerInputComponent->BindAction("LeftGrip", EInputEvent::IE_Pressed, this, &AGenericVRCharacter::LeftGripDown);
+	PlayerInputComponent->BindAction("LeftGrip", EInputEvent::IE_Released, this, &AGenericVRCharacter::LeftGripUp);
 	PlayerInputComponent->BindAction("RightGrip", EInputEvent::IE_Pressed, this, &AGenericVRCharacter::RightGripDown);
 	PlayerInputComponent->BindAction("RightGrip", EInputEvent::IE_Released, this, &AGenericVRCharacter::RightGripUp);
 }
@@ -181,10 +183,25 @@ void AGenericVRCharacter::RightTriggerUp()
 
 void AGenericVRCharacter::LeftGripDown()
 {
+	//Check for Grabbable actors
+	if (bAllowGripping && GrabSphere_L) {
+		TArray<AActor*> OverlappingActors;
+		GrabSphere_L->GetOverlappingActors(OverlappingActors);
+		AActor* NearestActor = GetClosestValidActor(OverlappingActors);
+		if (NearestActor) {
+			if (IPickupObject::Execute_GrabObject(NearestActor, LeftMotionControllerRoot, false)) LeftGrippedActor = NearestActor;
+		}
+		else LogWarning("No Actors with interface found.");
+	}
+	else if (bAllowGripping && !GrabSphere_L) {
+		LogError(GenerateErrorMessage(EVRErrorType::ET_FUNCTION_UNAVAILABLE_COMPONENT_ERROR, "Grab", "Left grab sphere missing."));
+	}
 }
 
 void AGenericVRCharacter::LeftGripUp()
 {
+	if (LeftGrippedActor) IPickupObject::Execute_ReleaseObject(LeftGrippedActor);
+	LeftGrippedActor = nullptr;
 }
 
 void AGenericVRCharacter::RightGripDown()
