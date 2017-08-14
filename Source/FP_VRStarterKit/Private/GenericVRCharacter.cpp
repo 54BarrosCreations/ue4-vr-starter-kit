@@ -15,25 +15,41 @@ AGenericVRCharacter::AGenericVRCharacter(const FObjectInitializer& ObjectInitial
 	RootComponent = VRSceneRoot;
 	VROrigin = CreateDefaultSubobject<USceneComponent>(TEXT("VR Origin"));
 	VROrigin->SetupAttachment(VRSceneRoot);
-	VRCameraOrigin = CreateDefaultSubobject<UCameraComponent>(FName("VR Camera Origin"));
-	VRCameraOrigin->SetupAttachment(VROrigin);
-	GetCapsuleComponent()->SetupAttachment(VRCameraOrigin);
+	DefaultCamera = CreateDefaultSubobject<UCameraComponent>(FName("VR Camera Origin"));
+	DefaultCamera->SetupAttachment(VROrigin);
+	GetCapsuleComponent()->SetupAttachment(DefaultCamera);
+
+	// Character Mesh Root
+	DefaultCharacterMeshRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Character Mesh Root"));
+	DefaultCharacterMeshRoot->SetupAttachment(VROrigin);
 
 	//Left Motion Controller
-	LeftMotionControllerRoot = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Left Controller"));
-	LeftMotionControllerRoot->SetupAttachment(VROrigin);
-	LeftMotionControllerRoot->SetIsReplicated(true);
-	LeftMotionControllerRoot->Hand = EControllerHand::Left;
+	LeftMotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Left Controller"));
+	LeftMotionController->SetupAttachment(VROrigin);
+	LeftMotionController->SetIsReplicated(false);
+	LeftMotionController->Hand = EControllerHand::Left;
+
+	//Left Controller Replicated Components
+	ReplicatedLeftControllerRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Replicated Left Controller Root"));
+	ReplicatedLeftControllerRoot->SetupAttachment(VROrigin);
+	SM_ReplicatedLeftController = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Replicated Left Controller Mesh"));
+	SM_ReplicatedLeftController->SetupAttachment(ReplicatedLeftControllerRoot);
 	PS_LeftControllerBeam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Left Controller Beam"));
-	PS_LeftControllerBeam->SetupAttachment(LeftMotionControllerRoot);
+	PS_LeftControllerBeam->SetupAttachment(ReplicatedLeftControllerRoot);
 
 	//Right Motion Controller
-	RightMotionControllerRoot = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Right Controller"));
-	RightMotionControllerRoot->SetupAttachment(VROrigin);
-	RightMotionControllerRoot->SetIsReplicated(true);
-	RightMotionControllerRoot->Hand = EControllerHand::Right;
+	RightMotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Right Controller"));
+	RightMotionController->SetupAttachment(VROrigin);
+	RightMotionController->SetIsReplicated(false);
+	RightMotionController->Hand = EControllerHand::Right;
+
+	//Right Controller Replicated Components
+	ReplicatedRightControllerRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Replicated Right Controller Root"));
+	ReplicatedRightControllerRoot->SetupAttachment(VROrigin);
+	SM_ReplicatedRightController = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Replicated Right Controller Mesh"));
+	SM_ReplicatedRightController->SetupAttachment(ReplicatedRightControllerRoot);
 	PS_RightControllerBeam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Right Controller Beam"));
-	PS_RightControllerBeam->SetupAttachment(RightMotionControllerRoot);
+	PS_RightControllerBeam->SetupAttachment(ReplicatedRightControllerRoot);
 
 	//Interaction Component
 	InteractionComponent = CreateDefaultSubobject<UVRCharacterInteractionComponent>(TEXT("Interaction Component"));
@@ -51,8 +67,15 @@ void AGenericVRCharacter::BeginPlay()
 void AGenericVRCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//if (IsLocallyControlled())	UpdateMotionControllerPositions();
 	if (bUseLaserInteraction)	UpdateLaser();
+	if (IsLocallyControlled()) {
+		ServerUpdateControllerPos(LeftMotionController->GetComponentTransform(), RightMotionController->GetComponentTransform());
+
+		FVector Pos;
+		FQuat Rot;
+		GEngine->HMDDevice->GetCurrentOrientationAndPosition(Rot, Pos);
+		ServerUpdateCharacterMeshPos(Pos, Rot.Rotator());
+	}
 }
 
 // Called to bind functionality to input
@@ -73,11 +96,11 @@ void AGenericVRCharacter::SetInitialActiveController()
 {
 	if (!InteractionComponent) return;
 	FHitResult HitResult;
-	if (InteractionComponent->TraceForUI(LeftMotionControllerRoot, HitResult)) {
+	if (InteractionComponent->TraceForUI(LeftMotionController, HitResult)) {
 		InteractionComponent->bRightControllerActive = false;
 		InteractionComponent->bControllerFirstTimeActive = false;
 	}
-	else if (InteractionComponent->TraceForUI(RightMotionControllerRoot, HitResult)) {
+	else if (InteractionComponent->TraceForUI(RightMotionController, HitResult)) {
 		InteractionComponent->bRightControllerActive = true;
 		InteractionComponent->bControllerFirstTimeActive = false;
 	}
@@ -89,13 +112,13 @@ void AGenericVRCharacter::UpdateMotionControllerPositions()
 	FVector LPos;
 	FRotator LRot;
 	USteamVRFunctionLibrary::GetHandPositionAndOrientation(0, EControllerHand::Left, LPos, LRot);
-	LeftMotionControllerRoot->SetRelativeTransform(FTransform(LRot, LPos, FVector(1, 1, 1)));
+	LeftMotionController->SetRelativeTransform(FTransform(LRot, LPos, FVector(1, 1, 1)));
 
 	//Right Controller
 	FVector RPos;
 	FRotator RRot;
 	USteamVRFunctionLibrary::GetHandPositionAndOrientation(0, EControllerHand::Right, RPos, RRot);
-	RightMotionControllerRoot->SetRelativeTransform(FTransform(RRot, RPos, FVector(1, 1, 1)));
+	RightMotionController->SetRelativeTransform(FTransform(RRot, RPos, FVector(1, 1, 1)));
 }
 
 void AGenericVRCharacter::UpdateLaser()
@@ -104,9 +127,9 @@ void AGenericVRCharacter::UpdateLaser()
 	else {
 		FHitResult HitResult;
 		if (InteractionComponent->bRightControllerActive) {
-			if (InteractionComponent->TraceForUI(RightMotionControllerRoot, HitResult)) {
-				PS_RightControllerBeam->SetBeamSourcePoint(0, RightMotionControllerRoot->GetComponentLocation(), 0);
-				PS_RightControllerBeam->SetBeamEndPoint(0, InteractionComponent->GetLaserBeamEndPoint(RightMotionControllerRoot, HitResult));
+			if (InteractionComponent->TraceForUI(RightMotionController, HitResult)) {
+				PS_RightControllerBeam->SetBeamSourcePoint(0, RightMotionController->GetComponentLocation(), 0);
+				PS_RightControllerBeam->SetBeamEndPoint(0, InteractionComponent->GetLaserBeamEndPoint(RightMotionController, HitResult));
 				if (PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(false);
 				if (!PS_RightControllerBeam->bVisible) PS_RightControllerBeam->SetVisibility(true);
 			}
@@ -115,9 +138,9 @@ void AGenericVRCharacter::UpdateLaser()
 			}
 		}
 		else if (!InteractionComponent->bRightControllerActive) {
-			if (InteractionComponent->TraceForUI(LeftMotionControllerRoot, HitResult)) {
-				PS_LeftControllerBeam->SetBeamSourcePoint(0, LeftMotionControllerRoot->GetComponentLocation(), 0);
-				PS_LeftControllerBeam->SetBeamEndPoint(0, InteractionComponent->GetLaserBeamEndPoint(LeftMotionControllerRoot, HitResult));
+			if (InteractionComponent->TraceForUI(LeftMotionController, HitResult)) {
+				PS_LeftControllerBeam->SetBeamSourcePoint(0, LeftMotionController->GetComponentLocation(), 0);
+				PS_LeftControllerBeam->SetBeamEndPoint(0, InteractionComponent->GetLaserBeamEndPoint(LeftMotionController, HitResult));
 				if (PS_RightControllerBeam->bVisible) PS_RightControllerBeam->SetVisibility(false);
 				if (!PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(true);
 			}
@@ -128,6 +151,58 @@ void AGenericVRCharacter::UpdateLaser()
 	}
 }
 
+void AGenericVRCharacter::ServerUpdateControllerPos_Implementation(FTransform LeftControllerTransform, FTransform RightControllerTransform)
+{
+	MulticastUpdateControllerPos(LeftControllerTransform, RightControllerTransform);
+}
+
+bool AGenericVRCharacter::ServerUpdateControllerPos_Validate(FTransform LeftControllerTransform, FTransform RightControllerTransform)
+{
+	return true;
+}
+
+void AGenericVRCharacter::MulticastUpdateControllerPos_Implementation(FTransform LeftControllerTransform, FTransform RightControllerTransform)
+{
+	ReplicatedLeftControllerRoot->SetWorldTransform(LeftControllerTransform);
+	ReplicatedRightControllerRoot->SetWorldTransform(RightControllerTransform);
+}
+
+bool AGenericVRCharacter::MulticastUpdateControllerPos_Validate(FTransform LeftControllerTransform, FTransform RightControllerTransform)
+{
+	return true;
+}
+
+void AGenericVRCharacter::ServerUpdateCharacterMeshPos_Implementation(FVector HMDPos, FRotator HMDRot)
+{
+	MulticastUpdateCharacterMeshPos(HMDPos, HMDRot);
+}
+
+bool AGenericVRCharacter::ServerUpdateCharacterMeshPos_Validate(FVector HMDPos, FRotator HMDRot)
+{
+	return true;
+}
+
+void AGenericVRCharacter::MulticastUpdateCharacterMeshPos_Implementation(FVector HMDPos, FRotator HMDRot)
+{
+	FRotator DefaultMeshRotation;
+	FRotator OptionalMeshRotation;
+
+	if (bAllowCharacterMeshRotation) DefaultMeshRotation = HMDRot;
+	else DefaultMeshRotation = FRotator::ZeroRotator;
+
+	if (bAllowOptionalMeshRotation) OptionalMeshRotation = HMDRot;
+	else OptionalMeshRotation = FRotator::ZeroRotator;
+
+	DefaultCharacterMeshRoot->SetRelativeLocationAndRotation(HMDPos, DefaultMeshRotation);
+	if (OptionalCharacterMesh) OptionalCharacterMesh->SetRelativeLocationAndRotation(HMDPos, OptionalMeshRotation);
+	
+}
+
+bool AGenericVRCharacter::MulticastUpdateCharacterMeshPos_Validate(FVector HMDPos, FRotator HMDRot)
+{
+	return true;
+}
+
 
 void AGenericVRCharacter::LeftTriggerDown()
 {
@@ -136,7 +211,7 @@ void AGenericVRCharacter::LeftTriggerDown()
 	//Check for UI Interaction
 	if (InteractionComponent->bRightControllerActive) {
 		FHitResult HitResult;
-		if (InteractionComponent->TraceForUI(LeftMotionControllerRoot, HitResult)) InteractionComponent->bRightControllerActive = false;
+		if (InteractionComponent->TraceForUI(LeftMotionController, HitResult)) InteractionComponent->bRightControllerActive = false;
 	} else {
 		if (InteractionComponent->TraceHitResultComponent) {
 			if (InteractionComponent->TraceHitResultComponent->IsA<UVRWidgetComponent>()) {
@@ -160,7 +235,7 @@ void AGenericVRCharacter::RightTriggerDown()
 	if (bUseLaserInteraction && InteractionComponent) {
 		if (!InteractionComponent->bRightControllerActive) {
 			FHitResult HitResult;
-			if (InteractionComponent->TraceForUI(RightMotionControllerRoot, HitResult)) InteractionComponent->bRightControllerActive = true;
+			if (InteractionComponent->TraceForUI(RightMotionController, HitResult)) InteractionComponent->bRightControllerActive = true;
 		} else {
 			if (InteractionComponent->TraceHitResultComponent) {
 				if (InteractionComponent->TraceHitResultComponent->IsA<UVRWidgetComponent>()) {
@@ -189,7 +264,7 @@ void AGenericVRCharacter::LeftGripDown()
 		GrabSphere_L->GetOverlappingActors(OverlappingActors);
 		AActor* NearestActor = GetClosestValidActor(OverlappingActors);
 		if (NearestActor) {
-			if (IPickupObject::Execute_GrabObject(NearestActor, LeftMotionControllerRoot, false)) LeftGrippedActor = NearestActor;
+			if (IPickupObject::Execute_GrabObject(NearestActor, ReplicatedLeftControllerRoot, false)) LeftGrippedActor = NearestActor;
 		}
 		else LogWarning("No Actors with interface found.");
 	}
@@ -214,7 +289,7 @@ void AGenericVRCharacter::RightGripDown()
 		GrabSphere_R->GetOverlappingActors(OverlappingActors);
 		AActor* NearestActor = GetClosestValidActor(OverlappingActors);
 		if (NearestActor) {
-			if (IPickupObject::Execute_GrabObject(NearestActor, RightMotionControllerRoot, false)) RightGrippedActor = NearestActor;
+			if (IPickupObject::Execute_GrabObject(NearestActor, ReplicatedRightControllerRoot, false)) RightGrippedActor = NearestActor;
 		}
 		else LogWarning("No Actors with interface found.");
 	}
@@ -276,10 +351,23 @@ void AGenericVRCharacter::GetOptionalComponents()
 				if (component->ComponentHasTag("LeftGrabSphere")) GrabSphere_L = Cast<USphereComponent>(component);
 				else if (component->ComponentHasTag("RightGrabSphere")) GrabSphere_R = Cast<USphereComponent>(component);
 			}
+
+			if (component->ComponentHasTag("OptionalMeshComponentRoot")) OptionalCharacterMesh = Cast<USceneComponent>(component);
 		}
 
 		if (!GrabSphere_L) LogError(GenerateErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "LeftGrabSphere"));
 		if (!GrabSphere_R) LogError(GenerateErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "RightGrabSphere"));
+		if (!OptionalCharacterMesh) LogWarning("No OptionalMeshComponentRoot found. Any additional meshes not a child of CharacterMeshRoot will be ignored for replication unless it is a child of a SceneComponent tagged 'OptionalMeshComponentRoot'");
 	}
+}
+
+FTransform AGenericVRCharacter::GetReplicatedTransform(FTransform ReplicatedTransform, bool bAllowRotation)
+{
+	FTransform transform;
+	transform.SetLocation(ReplicatedTransform.GetLocation());
+	if (bAllowRotation) transform.SetRotation(ReplicatedTransform.GetRotation());
+	else transform.SetRotation(FQuat::Identity);
+	transform.SetScale3D(ReplicatedTransform.GetScale3D());
+	return transform;
 }
 

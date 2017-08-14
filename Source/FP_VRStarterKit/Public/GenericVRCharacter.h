@@ -40,9 +40,6 @@ public:
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~VR Character Options~~
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers")
-	bool bUseMotionControllers = true;
-
-	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers")
 	bool bUseLaserInteraction = true;
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers", meta = (EditCondition = "bUseLaserInteraction"))
@@ -50,6 +47,14 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers")
 	bool bAllowGripping = true;
+
+	UPROPERTY(EditAnywhere, Category = "Generic VR Character")
+	//If false, will keep character mesh from rotating with hmd. Useful for meshes that only need positional tracking.
+	bool bAllowCharacterMeshRotation = true;
+
+	UPROPERTY(EditAnywhere, Category = "Generic VR Character")
+	//If false, will keep optional mesh from rotating with hmd. Useful for meshes that only need positional tracking.
+	bool bAllowOptionalMeshRotation = false;
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Inherited Components~~ 
@@ -63,13 +68,16 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly)
 	//Camera Component Root, parent mesh object to this
-	UCameraComponent* VRCameraOrigin = nullptr;
+	UCameraComponent* DefaultCamera = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
-	UMotionControllerComponent* LeftMotionControllerRoot = nullptr;
+	USceneComponent* DefaultCharacterMeshRoot = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
-	UMotionControllerComponent* RightMotionControllerRoot = nullptr;
+	UMotionControllerComponent* LeftMotionController = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UMotionControllerComponent* RightMotionController = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
 	UParticleSystemComponent* PS_LeftControllerBeam = nullptr;
@@ -80,11 +88,26 @@ public:
 	UPROPERTY(VisibleDefaultsOnly)
 	UVRCharacterInteractionComponent* InteractionComponent = nullptr;
 
+	//Left Controller Replication
+	UPROPERTY(VisibleDefaultsOnly)
+	USceneComponent* ReplicatedLeftControllerRoot = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UStaticMeshComponent* SM_ReplicatedLeftController = nullptr;
+
+	//Right Controller Replication
+	UPROPERTY(VisibleDefaultsOnly)
+	USceneComponent* ReplicatedRightControllerRoot = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UStaticMeshComponent* SM_ReplicatedRightController = nullptr;
+
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Optional Components~~ 
 
 	USphereComponent* GrabSphere_L = nullptr;
 	USphereComponent* GrabSphere_R = nullptr;
+	USceneComponent* OptionalCharacterMesh = nullptr;
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Functions~~ 
@@ -97,6 +120,29 @@ public:
 
 	UFUNCTION()
 	void UpdateLaser();
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Replication~~
+	UFUNCTION(Server, Unreliable, WithValidation)
+	void ServerUpdateControllerPos(FTransform LeftControllerTransform, FTransform RightControllerTransform);
+	void ServerUpdateControllerPos_Implementation(FTransform LeftControllerTransform, FTransform RightControllerTransform);
+	bool ServerUpdateControllerPos_Validate(FTransform LeftControllerTransform, FTransform RightControllerTransform);
+
+	UFUNCTION(NetMulticast, Unreliable, WithValidation)
+	void MulticastUpdateControllerPos(FTransform LeftControllerTransform, FTransform RightControllerTransform);
+	void MulticastUpdateControllerPos_Implementation(FTransform LeftControllerTransform, FTransform RightControllerTransform);
+	bool MulticastUpdateControllerPos_Validate(FTransform LeftControllerTransform, FTransform RightControllerTransform);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerUpdateCharacterMeshPos(FVector HMDPos, FRotator HMDRot);
+	void ServerUpdateCharacterMeshPos_Implementation(FVector HMDPos, FRotator HMDRot);
+	bool ServerUpdateCharacterMeshPos_Validate(FVector HMDPos, FRotator HMDRot);
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void MulticastUpdateCharacterMeshPos(FVector HMDPos, FRotator HMDRot);
+	void MulticastUpdateCharacterMeshPos_Implementation(FVector HMDPos, FRotator HMDRot);
+	bool MulticastUpdateCharacterMeshPos_Validate(FVector HMDPos, FRotator HMDRot);
+
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Controller Events~~
@@ -137,5 +183,9 @@ private:
 
 	void InitializeHMD();
 	void GetOptionalComponents();
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Utilities~~
+	FTransform GetReplicatedTransform(FTransform ReplicatedTransform, bool bAllowRotation);
 	
 };
