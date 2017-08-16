@@ -133,12 +133,12 @@ public:
 	void MulticastUpdateControllerPos_Implementation(FTransform LeftControllerTransform, FTransform RightControllerTransform);
 	bool MulticastUpdateControllerPos_Validate(FTransform LeftControllerTransform, FTransform RightControllerTransform);
 
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(Server, Unreliable, WithValidation)
 	void ServerUpdateCharacterMeshPos(FVector HMDPos, FRotator HMDRot);
 	void ServerUpdateCharacterMeshPos_Implementation(FVector HMDPos, FRotator HMDRot);
 	bool ServerUpdateCharacterMeshPos_Validate(FVector HMDPos, FRotator HMDRot);
 
-	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	UFUNCTION(NetMulticast, Unreliable, WithValidation)
 	void MulticastUpdateCharacterMeshPos(FVector HMDPos, FRotator HMDRot);
 	void MulticastUpdateCharacterMeshPos_Implementation(FVector HMDPos, FRotator HMDRot);
 	bool MulticastUpdateCharacterMeshPos_Validate(FVector HMDPos, FRotator HMDRot);
