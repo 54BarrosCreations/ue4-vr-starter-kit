@@ -143,6 +143,9 @@ public:
 	void MulticastUpdateCharacterMeshPos_Implementation(FVector HMDPos, FRotator HMDRot);
 	bool MulticastUpdateCharacterMeshPos_Validate(FVector HMDPos, FRotator HMDRot);
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VR Character Events")
+	void SetReplicatedComponentsVisible(bool newVisibility);
+
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Controller Events~~

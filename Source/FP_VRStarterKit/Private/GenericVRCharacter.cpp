@@ -35,7 +35,7 @@ AGenericVRCharacter::AGenericVRCharacter(const FObjectInitializer& ObjectInitial
 	SM_ReplicatedLeftController = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Replicated Left Controller Mesh"));
 	SM_ReplicatedLeftController->SetupAttachment(ReplicatedLeftControllerRoot);
 	PS_LeftControllerBeam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Left Controller Beam"));
-	PS_LeftControllerBeam->SetupAttachment(ReplicatedLeftControllerRoot);
+	PS_LeftControllerBeam->SetupAttachment(LeftMotionController);
 
 	//Right Motion Controller
 	RightMotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Right Controller"));
@@ -49,7 +49,7 @@ AGenericVRCharacter::AGenericVRCharacter(const FObjectInitializer& ObjectInitial
 	SM_ReplicatedRightController = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Replicated Right Controller Mesh"));
 	SM_ReplicatedRightController->SetupAttachment(ReplicatedRightControllerRoot);
 	PS_RightControllerBeam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Right Controller Beam"));
-	PS_RightControllerBeam->SetupAttachment(ReplicatedRightControllerRoot);
+	PS_RightControllerBeam->SetupAttachment(RightMotionController);
 
 	//Interaction Component
 	InteractionComponent = CreateDefaultSubobject<UVRCharacterInteractionComponent>(TEXT("Interaction Component"));
@@ -69,12 +69,16 @@ void AGenericVRCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (bUseLaserInteraction)	UpdateLaser();
 	if (IsLocallyControlled()) {
-		ServerUpdateControllerPos(LeftMotionController->GetComponentTransform(), RightMotionController->GetComponentTransform());
-
+		//Update Body
 		FVector Pos;
 		FQuat Rot;
 		GEngine->HMDDevice->GetCurrentOrientationAndPosition(Rot, Pos);
 		ServerUpdateCharacterMeshPos(Pos, Rot.Rotator());
+
+		if (!HasAuthority()) {
+			//Update Replicated Controllers
+			ServerUpdateControllerPos(LeftMotionController->GetRelativeTransform(), RightMotionController->GetRelativeTransform());
+		}
 	}
 }
 
@@ -163,8 +167,8 @@ bool AGenericVRCharacter::ServerUpdateControllerPos_Validate(FTransform LeftCont
 
 void AGenericVRCharacter::MulticastUpdateControllerPos_Implementation(FTransform LeftControllerTransform, FTransform RightControllerTransform)
 {
-	ReplicatedLeftControllerRoot->SetWorldTransform(LeftControllerTransform);
-	ReplicatedRightControllerRoot->SetWorldTransform(RightControllerTransform);
+	ReplicatedLeftControllerRoot->SetRelativeTransform(LeftControllerTransform);
+	ReplicatedRightControllerRoot->SetRelativeTransform(RightControllerTransform);
 }
 
 bool AGenericVRCharacter::MulticastUpdateControllerPos_Validate(FTransform LeftControllerTransform, FTransform RightControllerTransform)
@@ -264,7 +268,7 @@ void AGenericVRCharacter::LeftGripDown()
 		GrabSphere_L->GetOverlappingActors(OverlappingActors);
 		AActor* NearestActor = GetClosestValidActor(OverlappingActors);
 		if (NearestActor) {
-			if (IPickupObject::Execute_GrabObject(NearestActor, ReplicatedLeftControllerRoot, false)) LeftGrippedActor = NearestActor;
+			if (IPickupObject::Execute_GrabObject(NearestActor, LeftMotionController, false)) LeftGrippedActor = NearestActor;
 		}
 		else LogWarning("No Actors with interface found.");
 	}
@@ -289,7 +293,7 @@ void AGenericVRCharacter::RightGripDown()
 		GrabSphere_R->GetOverlappingActors(OverlappingActors);
 		AActor* NearestActor = GetClosestValidActor(OverlappingActors);
 		if (NearestActor) {
-			if (IPickupObject::Execute_GrabObject(NearestActor, ReplicatedRightControllerRoot, false)) RightGrippedActor = NearestActor;
+			if (IPickupObject::Execute_GrabObject(NearestActor, RightMotionController, false)) RightGrippedActor = NearestActor;
 		}
 		else LogWarning("No Actors with interface found.");
 	}
