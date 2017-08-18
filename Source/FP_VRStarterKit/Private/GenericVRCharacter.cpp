@@ -7,7 +7,7 @@
 
 // Sets default values
 AGenericVRCharacter::AGenericVRCharacter(const FObjectInitializer& ObjectInitializer) 
-	: Super(ObjectInitializer.DoNotCreateDefaultSubobject(ACharacter::MeshComponentName))
+	: Super(ObjectInitializer.DoNotCreateDefaultSubobject(ACharacter::MeshComponentName).SetDefaultSubobjectClass<UVRCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -61,6 +61,11 @@ void AGenericVRCharacter::BeginPlay()
 	Super::BeginPlay();
 	InitializeHMD();
 	GetOptionalComponents();
+	if (HasAuthority() || IsLocallyControlled()) {
+		/*ReplicatedLeftControllerRoot->SetVisibility(false, true);
+		ReplicatedRightControllerRoot->SetVisibility(false, true);*/
+	}
+
 }
 
 // Called every frame

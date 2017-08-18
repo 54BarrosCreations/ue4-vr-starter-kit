@@ -6,6 +6,7 @@
 #include "Engine.h"
 #include "PickupObject.h"
 #include "VRCharacterInteractionComponent.h"
+#include "VRCharacterMovementComponent.h"
 #include "MotionControllerComponent.h"
 #include "SteamVRFunctionLibrary.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
