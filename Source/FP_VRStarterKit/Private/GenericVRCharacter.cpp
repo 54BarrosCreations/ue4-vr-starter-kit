@@ -53,12 +53,16 @@ AGenericVRCharacter::AGenericVRCharacter(const FObjectInitializer& ObjectInitial
 
 	//Interaction Component
 	InteractionComponent = CreateDefaultSubobject<UVRCharacterInteractionComponent>(TEXT("Interaction Component"));
+
+	
 }
 
 // Called when the game starts or when spawned
 void AGenericVRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	//Cast Movement component to VrMovementComponent type
+	VRMovementComponent = Cast<UVRCharacterMovementComponent>(GetCharacterMovement());
 	InitializeHMD();
 	GetOptionalComponents();
 	if (HasAuthority() || IsLocallyControlled()) {
@@ -73,7 +77,8 @@ void AGenericVRCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (bUseLaserInteraction)	UpdateLaser();
-	if (IsLocallyControlled()) {
+	if (bAllowTeleportation) RenderTeleportPreview();
+	if (IsLocallyControlled() && GEngine->HMDDevice.IsValid()) {
 		//Update Body
 		FVector Pos;
 		FQuat Rot;
@@ -99,6 +104,10 @@ void AGenericVRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("LeftGrip", EInputEvent::IE_Released, this, &AGenericVRCharacter::LeftGripUp);
 	PlayerInputComponent->BindAction("RightGrip", EInputEvent::IE_Pressed, this, &AGenericVRCharacter::RightGripDown);
 	PlayerInputComponent->BindAction("RightGrip", EInputEvent::IE_Released, this, &AGenericVRCharacter::RightGripUp);
+	PlayerInputComponent->BindAction("LeftThumb", EInputEvent::IE_Pressed, this, &AGenericVRCharacter::LeftThumbStickDown);
+	PlayerInputComponent->BindAction("LeftThumb", EInputEvent::IE_Released, this, &AGenericVRCharacter::LeftThumbStickUp);
+	PlayerInputComponent->BindAction("RightThumb", EInputEvent::IE_Pressed, this, &AGenericVRCharacter::RightThumbStickDown);
+	PlayerInputComponent->BindAction("RightThumb", EInputEvent::IE_Released, this, &AGenericVRCharacter::RightThumbStickUp);
 }
 
 void AGenericVRCharacter::SetInitialActiveController()
@@ -157,6 +166,42 @@ void AGenericVRCharacter::UpdateLaser()
 				if (PS_LeftControllerBeam->bVisible) PS_LeftControllerBeam->SetVisibility(false);
 			}
 		}
+	}
+}
+
+void AGenericVRCharacter::RenderTeleportPreview()
+{
+	if (!VRMovementComponent) { 
+		LogError("WTF");
+		return; 
+	}
+
+	if (bAllowTeleportation) {
+		if (VRMovementComponent->bLeftTeleporterActive ^ VRMovementComponent->bRightTeleporterActive) {
+			FVector outNavLocation;
+			FVector outTraceLocation;
+			TArray<FVector> outSplinePoints;
+			bool bTeleportDestinationIsValid = VRMovementComponent->TraceTeleportDestination(outNavLocation, outTraceLocation, outSplinePoints, ActiveTeleportHand);
+			VRMovementComponent->UpdateArcEndPoint(bTeleportDestinationIsValid, outTraceLocation);
+			bLastFrameValidTeleportDestination = bTeleportDestinationIsValid;
+		}
+	}
+}
+
+void AGenericVRCharacter::ExecuteTeleport()
+{
+	if (!VRMovementComponent) return;
+	if (!bIsTeleporting && bLastFrameValidTeleportDestination) {
+		bIsTeleporting = true;
+		FVector OutLocation;
+		FRotator OutRot;
+		VRMovementComponent->GetTeleportDestination(OutLocation, OutRot);
+		TeleportTo(OutLocation, OutRot);
+		VRMovementComponent->DeactivateTeleporter();
+		ActiveTeleportHand = EControllerHand::Special_9;
+		bIsTeleporting = false;
+	}else {
+		VRMovementComponent->DeactivateTeleporter();
 	}
 }
 
@@ -313,6 +358,28 @@ void AGenericVRCharacter::RightGripUp()
 	RightGrippedActor = nullptr;
 }
 
+void AGenericVRCharacter::LeftThumbStickDown()
+{
+	if (ActiveTeleportHand != EControllerHand::Left) ActiveTeleportHand = EControllerHand::Left;
+	if (VRMovementComponent) VRMovementComponent->ActivateTeleporter(ActiveTeleportHand);
+}
+
+void AGenericVRCharacter::LeftThumbStickUp()
+{
+	if (ActiveTeleportHand == EControllerHand::Left) ExecuteTeleport();
+}
+
+void AGenericVRCharacter::RightThumbStickDown()
+{
+	if (ActiveTeleportHand != EControllerHand::Right) ActiveTeleportHand = EControllerHand::Right;
+	if (VRMovementComponent) VRMovementComponent->ActivateTeleporter(ActiveTeleportHand);
+}
+
+void AGenericVRCharacter::RightThumbStickUp()
+{
+	if (ActiveTeleportHand == EControllerHand::Right) ExecuteTeleport();
+}
+
 AActor * AGenericVRCharacter::GetClosestValidActor(TArray<AActor*> InOverlappingActors)
 {
 	float nearest = 9999.0f;
@@ -336,6 +403,7 @@ AActor * AGenericVRCharacter::GetClosestValidActor(TArray<AActor*> InOverlapping
 
 void AGenericVRCharacter::InitializeHMD()
 {
+	if (!GEngine->HMDDevice.IsValid()) return;
 	HMD = GEngine->HMDDevice->GetHMDDeviceType();
 
 	switch (HMD) {

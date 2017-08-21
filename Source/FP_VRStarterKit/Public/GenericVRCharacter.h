@@ -49,6 +49,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers")
 	bool bAllowGripping = true;
 
+	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers")
+	bool bAllowTeleportation = true;
+
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character")
 	//If false, will keep character mesh from rotating with hmd. Useful for meshes that only need positional tracking.
 	bool bAllowCharacterMeshRotation = true;
@@ -103,6 +106,12 @@ public:
 	UPROPERTY(VisibleDefaultsOnly)
 	UStaticMeshComponent* SM_ReplicatedRightController = nullptr;
 
+	UPROPERTY(BlueprintReadOnly)
+	UVRCharacterMovementComponent * VRMovementComponent = nullptr;
+
+	UPROPERTY(BlueprintReadWrite)
+	EControllerHand ActiveTeleportHand = EControllerHand::Special_9;
+
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Optional Components~~ 
 
@@ -121,6 +130,12 @@ public:
 
 	UFUNCTION()
 	void UpdateLaser();
+
+	UFUNCTION()
+	void RenderTeleportPreview();
+
+	UFUNCTION()
+	void ExecuteTeleport();
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Replication~~
@@ -175,6 +190,10 @@ private:
 	void LeftGripUp();
 	void RightGripDown();
 	void RightGripUp();
+	void LeftThumbStickDown();
+	void LeftThumbStickUp();
+	void RightThumbStickDown();
+	void RightThumbStickUp();
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Gripping~~
@@ -191,5 +210,7 @@ private:
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Utilities~~
 	FTransform GetReplicatedTransform(FTransform ReplicatedTransform, bool bAllowRotation);
+	bool bIsTeleporting = false;
+	bool bLastFrameValidTeleportDestination = false;
 	
 };
