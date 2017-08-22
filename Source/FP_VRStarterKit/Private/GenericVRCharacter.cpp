@@ -78,6 +78,7 @@ void AGenericVRCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (bUseLaserInteraction)	UpdateLaser();
 	if (bAllowTeleportation) RenderTeleportPreview();
+
 	if (IsLocallyControlled() && GEngine->HMDDevice.IsValid()) {
 		//Update Body
 		FVector Pos;
@@ -108,6 +109,10 @@ void AGenericVRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("LeftThumb", EInputEvent::IE_Released, this, &AGenericVRCharacter::LeftThumbStickUp);
 	PlayerInputComponent->BindAction("RightThumb", EInputEvent::IE_Pressed, this, &AGenericVRCharacter::RightThumbStickDown);
 	PlayerInputComponent->BindAction("RightThumb", EInputEvent::IE_Released, this, &AGenericVRCharacter::RightThumbStickUp);
+	PlayerInputComponent->BindAxis("LeftThumbX");
+	PlayerInputComponent->BindAxis("LeftThumbY");
+	PlayerInputComponent->BindAxis("RightThumbX");
+	PlayerInputComponent->BindAxis("RightThumbY");
 }
 
 void AGenericVRCharacter::SetInitialActiveController()
@@ -171,20 +176,18 @@ void AGenericVRCharacter::UpdateLaser()
 
 void AGenericVRCharacter::RenderTeleportPreview()
 {
-	if (!VRMovementComponent) { 
-		LogError("WTF");
-		return; 
-	}
+	if (!VRMovementComponent) return; 
+	if (VRMovementComponent->bLeftTeleporterActive ^ VRMovementComponent->bRightTeleporterActive) {
+		FVector outNavLocation;
+		FVector outTraceLocation;
+		TArray<FVector> outSplinePoints;
+		bool bTeleportDestinationIsValid = VRMovementComponent->TraceTeleportDestination(outNavLocation, outTraceLocation, outSplinePoints, ActiveTeleportHand);
+		VRMovementComponent->UpdateArcEndPoint(bTeleportDestinationIsValid, outTraceLocation);
+		bLastFrameValidTeleportDestination = bTeleportDestinationIsValid;
 
-	if (bAllowTeleportation) {
-		if (VRMovementComponent->bLeftTeleporterActive ^ VRMovementComponent->bRightTeleporterActive) {
-			FVector outNavLocation;
-			FVector outTraceLocation;
-			TArray<FVector> outSplinePoints;
-			bool bTeleportDestinationIsValid = VRMovementComponent->TraceTeleportDestination(outNavLocation, outTraceLocation, outSplinePoints, ActiveTeleportHand);
-			VRMovementComponent->UpdateArcEndPoint(bTeleportDestinationIsValid, outTraceLocation);
-			bLastFrameValidTeleportDestination = bTeleportDestinationIsValid;
-		}
+		//Update Teleport Rotation
+		if (ActiveTeleportHand == EControllerHand::Left) VRMovementComponent->SetTeleportRotation(FVector2D(InputComponent->GetAxisValue("LeftThumbX"), InputComponent->GetAxisValue("LeftThumbY")));
+		else if (ActiveTeleportHand == EControllerHand::Right) VRMovementComponent->SetTeleportRotation(FVector2D(InputComponent->GetAxisValue("RightThumbX"), InputComponent->GetAxisValue("RightThumbY")));
 	}
 }
 

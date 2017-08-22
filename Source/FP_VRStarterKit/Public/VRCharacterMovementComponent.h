@@ -32,6 +32,9 @@ public:
 	USceneComponent* TeleportBase = nullptr;
 
 	UPROPERTY(BlueprintReadOnly)
+	USceneComponent* TeleportDirection = nullptr;
+
+	UPROPERTY(BlueprintReadOnly)
 	USceneComponent* ArcEndPoint = nullptr;
 
 	UPROPERTY(BlueprintReadOnly)
@@ -41,7 +44,7 @@ public:
 	UArrowComponent* RightArrow = nullptr;
 
 	UFUNCTION(BlueprintCallable, Category = "VR Movement Component")
-	void InitializeMovementComponent(USceneComponent* TPBase, USceneComponent* AEndPoint, UArrowComponent* LeftArcDirection, UArrowComponent* RightArcDirection);
+	void InitializeMovementComponent(USceneComponent* TPBase, USceneComponent* TPDirection, USceneComponent* AEndPoint, UArrowComponent* LeftArcDirection, UArrowComponent* RightArcDirection);
 
 	UFUNCTION(BlueprintCallable, Category = "VR Movement Component")
 	void ActivateTeleporter(EControllerHand CallingHand);
@@ -53,13 +56,16 @@ public:
 	bool TraceTeleportDestination(FVector &outNavLocation, FVector &outTraceLocation, TArray<FVector> &outTracePoints, EControllerHand CallingHand);
 
 	UFUNCTION(BlueprintCallable, Category = "VR Movement Component")
+	void SetTeleportRotation(FVector2D AxisValues);
+
+	UFUNCTION(BlueprintCallable, Category = "VR Movement Component")
 	void UpdateArcEndPoint(bool bValidLocationFound, FVector newLocation);
 
 	UFUNCTION(BlueprintPure, Category = "VR Movement Component")
 	bool GetTeleportDestination(FVector& OutLocation, FRotator & OutRotation);
 
 	UFUNCTION(BlueprintPure, Category = "VR MovementComponent")
-	bool GetTeleportLaunchVelocity(EControllerHand Hand, FVector &outArcStart, FVector &outLaunchVelocity);
+	bool GetTeleportStartPointAndVelocity(EControllerHand Hand, FVector &outArcStart, FVector &outLaunchVelocity);
 	 
 	UPROPERTY(BlueprintReadWrite)
 	bool bRightTeleporterActive = false;

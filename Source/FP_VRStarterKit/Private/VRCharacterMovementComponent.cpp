@@ -8,14 +8,16 @@
 #include "Engine.h"
 #include "HeadMountedDisplay.h"
 
-void UVRCharacterMovementComponent::InitializeMovementComponent(USceneComponent * TPBase, USceneComponent * AEndPoint, UArrowComponent * LeftArcDirection, UArrowComponent * RightArcDirection)
+void UVRCharacterMovementComponent::InitializeMovementComponent(USceneComponent * TPBase, USceneComponent* TPDirection, USceneComponent * AEndPoint, UArrowComponent * LeftArcDirection, UArrowComponent * RightArcDirection)
 {
 	if (TPBase) TeleportBase = TPBase;
+	if (TPDirection) TeleportDirection = TPDirection;
 	if (AEndPoint) ArcEndPoint = AEndPoint;
 	if (LeftArcDirection) LeftArrow = LeftArcDirection;
 	if (RightArcDirection) RightArrow = RightArcDirection;
 
 	if (!TeleportBase) LogError(GenerateErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "TeleportBase"));
+	if (!TeleportDirection) LogError(GenerateErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "TeleportDirection"));
 	if (!ArcEndPoint) LogError(GenerateErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "ArcEndPoint"));
 	if (!LeftArrow) LogError(GenerateErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "LeftArrowComponent"));
 	if (!RightArrow) LogError(GenerateErrorMessage(EVRErrorType::ET_OPTIONAL_COMPONENT_ERROR, "RightArrowComponent"));
@@ -39,21 +41,23 @@ void UVRCharacterMovementComponent::ActivateTeleporter(EControllerHand CallingHa
 		break;
 	}
 
-	TeleportBase->SetVisibility(true, true);
+	if (TeleportBase) TeleportBase->SetVisibility(true, true);
 }
 
 void UVRCharacterMovementComponent::DeactivateTeleporter()
 {
 	bLeftTeleporterActive = false;
 	bRightTeleporterActive = false;
-	TeleportBase->SetVisibility(false, true);
+
+	if (TeleportBase) TeleportBase->SetVisibility(false, true);
+	if (TeleportDirection) TeleportDirection->SetVisibility(false, true);
 }
 
 bool UVRCharacterMovementComponent::TraceTeleportDestination(FVector & outNavLocation, FVector & outTraceLocation, TArray<FVector>& outTracePoints, EControllerHand CallingHand)
 {
 	FVector ArcStart;
 	FVector LaunchVelocity;
-	GetTeleportLaunchVelocity(CallingHand, ArcStart, LaunchVelocity);
+	GetTeleportStartPointAndVelocity(CallingHand, ArcStart, LaunchVelocity);
 	FPredictProjectilePathParams ProjectileParams;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ProjectileTypes;
 	ProjectileTypes.Add(EObjectTypeQuery::ObjectTypeQuery1);
@@ -82,19 +86,41 @@ bool UVRCharacterMovementComponent::TraceTeleportDestination(FVector & outNavLoc
 	return false;
 }
 
+void UVRCharacterMovementComponent::SetTeleportRotation(FVector2D AxisValues)
+{
+	if (!TeleportDirection) return;
+	FRotator CharRot = FRotator(0, GetOwner()->GetActorRotation().Yaw, 0);
+	if (VRMovementType == EVRMovementType::MT_TPThumbstickRotation) {
+		FVector normalized = FVector(AxisValues.X, AxisValues.Y, 0);
+		normalized.Normalize();
+		FVector normalizedRotated = CharRot.RotateVector(normalized);
+		FRotator FinalRot = normalizedRotated.ToOrientationRotator();
+
+		if (FGenericPlatformMath::Abs(AxisValues.X) + FGenericPlatformMath::Abs(AxisValues.Y) >= 0.3) {
+			TeleportRotation = FinalRot;
+			if (TeleportDirection) TeleportDirection->SetVisibility(true, true);
+		}else {
+			TeleportRotation = CharRot;
+			if (TeleportDirection) TeleportDirection->SetVisibility(false, true);
+		}
+	}else if (VRMovementType == EVRMovementType::MT_TPFixedRotation) {
+		TeleportRotation = CharRot;
+	}
+	
+}
+
 void UVRCharacterMovementComponent::UpdateArcEndPoint(bool bValidLocationFound, FVector newLocation)
 {
+	if (!ArcEndPoint) return;
 	if (bValidLocationFound) {
 		ArcEndPoint->SetWorldLocation(newLocation);
 		if (!GEngine->HMDDevice.IsValid()) return;
-		if (VRMovementType == EVRMovementType::MT_TPThumbstickRotation) {
-			FVector pos = FVector::ZeroVector;
-			FQuat rot = FQuat::Identity;
-			GEngine->HMDDevice->GetCurrentOrientationAndPosition(rot, pos);
-			FRotator HmdRot = rot.Rotator();
-			FRotator CombinedRotator = FRotator(TeleportRotation.Pitch, TeleportRotation.Yaw + HmdRot.Yaw, TeleportRotation.Roll);
-			ArcEndPoint->SetWorldRotation(CombinedRotator);
-		}
+		FVector pos = FVector::ZeroVector;
+		FQuat rot = FQuat::Identity;
+		GEngine->HMDDevice->GetCurrentOrientationAndPosition(rot, pos);
+		FRotator HmdRot = rot.Rotator();
+		FRotator CombinedRotator = FRotator(0, TeleportRotation.Yaw + HmdRot.Yaw, 0);
+		TeleportDirection->SetWorldRotation(CombinedRotator);
 	}
 }
 
@@ -104,15 +130,22 @@ bool UVRCharacterMovementComponent::GetTeleportDestination(FVector & OutLocation
 	FVector hmdPos;
 	FQuat hmdQuat;
 	GEngine->HMDDevice->GetCurrentOrientationAndPosition(hmdQuat, hmdPos);
-	FVector HmdUnrotated = TeleportRotation.RotateVector(FVector(hmdPos.X, hmdPos.Y, 0));
-	FRotator pawnRot = UGameplayStatics::GetPlayerPawn(this, 0)->GetActorRotation();
-	FVector HmdFinal = TeleportBase->GetComponentLocation() - pawnRot.RotateVector(hmdPos);
-	OutLocation = FVector(HmdFinal.X, HmdFinal.Y, 0);
-	OutRotation = TeleportRotation;
+	if (VRMovementType == EVRMovementType::MT_TPThumbstickRotation) {
+		FVector HmdUnrotated = TeleportRotation.RotateVector(FVector(hmdPos.X, hmdPos.Y, 0));
+		FVector HmdFinal = TeleportBase->GetComponentLocation() - HmdUnrotated;
+		OutLocation = FVector(HmdFinal.X, HmdFinal.Y, 0);
+		OutRotation = TeleportRotation;
+	}
+	else {
+		FRotator pawnRot = UGameplayStatics::GetPlayerPawn(this, 0)->GetActorRotation();
+		FVector HmdFinal = TeleportBase->GetComponentLocation() - pawnRot.RotateVector(hmdPos);
+		OutLocation = FVector(HmdFinal.X, HmdFinal.Y, 0);
+		OutRotation = pawnRot;
+	}
 	return true;
 }
 
-bool UVRCharacterMovementComponent::GetTeleportLaunchVelocity(EControllerHand Hand, FVector & outArcStart, FVector & outLaunchVelocity)
+bool UVRCharacterMovementComponent::GetTeleportStartPointAndVelocity(EControllerHand Hand, FVector & outArcStart, FVector & outLaunchVelocity)
 {
 	switch (Hand)
 	{
