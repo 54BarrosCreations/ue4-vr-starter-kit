@@ -53,7 +53,7 @@ public:
 	void DeactivateTeleporter();
 
 	UFUNCTION(BlueprintCallable, Category = "VR Movement Component")
-	bool TraceTeleportDestination(FVector &outNavLocation, FVector &outTraceLocation, TArray<FVector> &outTracePoints, EControllerHand CallingHand);
+	bool TraceTeleportDestination(FVector &outNavLocation, FVector &outTraceLocation, TArray<FVector> &outTracePoints, EControllerHand CallingHand, AActor* AdditionalActorToIgnore = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "VR Movement Component")
 	void SetTeleportRotation(FVector2D AxisValues);

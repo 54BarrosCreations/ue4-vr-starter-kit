@@ -181,7 +181,10 @@ void AGenericVRCharacter::RenderTeleportPreview()
 		FVector outNavLocation;
 		FVector outTraceLocation;
 		TArray<FVector> outSplinePoints;
-		bool bTeleportDestinationIsValid = VRMovementComponent->TraceTeleportDestination(outNavLocation, outTraceLocation, outSplinePoints, ActiveTeleportHand);
+		AActor* ActorToIgnore = nullptr;
+		if (LeftGrippedActor) ActorToIgnore = LeftGrippedActor;
+		else if (RightGrippedActor) ActorToIgnore = RightGrippedActor;
+		bool bTeleportDestinationIsValid = VRMovementComponent->TraceTeleportDestination(outNavLocation, outTraceLocation, outSplinePoints, ActiveTeleportHand, ActorToIgnore);
 		VRMovementComponent->UpdateArcEndPoint(bTeleportDestinationIsValid, outTraceLocation);
 		bLastFrameValidTeleportDestination = bTeleportDestinationIsValid;
 

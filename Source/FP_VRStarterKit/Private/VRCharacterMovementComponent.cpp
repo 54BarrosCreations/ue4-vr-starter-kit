@@ -53,7 +53,7 @@ void UVRCharacterMovementComponent::DeactivateTeleporter()
 	if (TeleportDirection) TeleportDirection->SetVisibility(false, true);
 }
 
-bool UVRCharacterMovementComponent::TraceTeleportDestination(FVector & outNavLocation, FVector & outTraceLocation, TArray<FVector>& outTracePoints, EControllerHand CallingHand)
+bool UVRCharacterMovementComponent::TraceTeleportDestination(FVector & outNavLocation, FVector & outTraceLocation, TArray<FVector>& outTracePoints, EControllerHand CallingHand, AActor* AdditionalActorToIgnore)
 {
 	FVector ArcStart;
 	FVector LaunchVelocity;
@@ -66,6 +66,7 @@ bool UVRCharacterMovementComponent::TraceTeleportDestination(FVector & outNavLoc
 	ProjectileParams.bTraceWithCollision = true;
 	ProjectileParams.ProjectileRadius = 0.f;
 	ProjectileParams.ActorsToIgnore.Add(GetOwner());
+	if (AdditionalActorToIgnore) ProjectileParams.ActorsToIgnore.Add(AdditionalActorToIgnore);
 	ProjectileParams.ObjectTypes = ProjectileTypes;
 	FPredictProjectilePathResult Result;
 	if (UGameplayStatics::PredictProjectilePath(this, ProjectileParams, Result)) {
