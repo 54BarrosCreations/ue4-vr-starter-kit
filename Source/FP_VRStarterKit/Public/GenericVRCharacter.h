@@ -41,16 +41,16 @@ public:
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~VR Character Options~~
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers")
-	bool bUseLaserInteraction = true;
+	bool bUseLaserInteraction = false;
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers", meta = (EditCondition = "bUseLaserInteraction"))
 	float LaserDrawDistance = 5000.f;
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers")
-	bool bAllowGripping = true;
+	bool bAllowGripping = false;
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character|Motion Controllers")
-	bool bAllowTeleportation = true;
+	bool bAllowTeleportation = false;
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Character")
 	//If false, will keep character mesh from rotating with hmd. Useful for meshes that only need positional tracking.

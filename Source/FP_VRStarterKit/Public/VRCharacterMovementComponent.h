@@ -23,7 +23,7 @@ class FP_VRSTARTERKIT_API UVRCharacterMovementComponent : public UCharacterMovem
 	
 public:
 	UPROPERTY(EditAnywhere, Category = "VR Character Movement Component")
-	EVRMovementType VRMovementType = EVRMovementType::MT_TPFixedRotation;
+	EVRMovementType VRMovementType = EVRMovementType::MT_TPThumbstickRotation;
 
 	UPROPERTY(EditAnywhere, Category = "VR Character Movement Component")
 	float TeleportLaunchVelocity = 5000.f;
