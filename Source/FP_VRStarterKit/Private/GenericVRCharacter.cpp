@@ -79,11 +79,11 @@ void AGenericVRCharacter::Tick(float DeltaTime)
 	if (bUseLaserInteraction)	UpdateLaser();
 	if (bAllowTeleportation) RenderTeleportPreview();
 
-	if (IsLocallyControlled() && GEngine->HMDDevice.IsValid()) {
+	if (IsLocallyControlled() /*&& GEngine->HMDDevice.IsValid()*/) {
 		//Update Body
 		FVector Pos;
 		FQuat Rot;
-		GEngine->HMDDevice->GetCurrentOrientationAndPosition(Rot, Pos);
+		//GEngine->HMDDevice->GetCurrentOrientationAndPosition(Rot, Pos);
 		ServerUpdateCharacterMeshPos(Pos, Rot.Rotator());
 
 		if (!HasAuthority()) {
@@ -409,7 +409,7 @@ AActor * AGenericVRCharacter::GetClosestValidActor(TArray<AActor*> InOverlapping
 
 void AGenericVRCharacter::InitializeHMD()
 {
-	if (!GEngine->HMDDevice.IsValid()) return;
+	/*if (!GEngine->HMDDevice.IsValid()) return;
 	HMD = GEngine->HMDDevice->GetHMDDeviceType();
 
 	switch (HMD) {
@@ -422,7 +422,7 @@ void AGenericVRCharacter::InitializeHMD()
 		default:
 			LogError(GenerateErrorMessage(EVRErrorType::ET_CUSTOM_ERROR, "", "Invalid HMD Type : Currently the VR Starter Kit only supports SteamVR and OculusRift"));
 			break;
-	}
+	}*/
 }
 
 void AGenericVRCharacter::GetOptionalComponents()

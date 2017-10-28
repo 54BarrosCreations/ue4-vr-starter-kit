@@ -115,10 +115,10 @@ void UVRCharacterMovementComponent::UpdateArcEndPoint(bool bValidLocationFound, 
 	if (!ArcEndPoint) return;
 	if (bValidLocationFound) {
 		ArcEndPoint->SetWorldLocation(newLocation);
-		if (!GEngine->HMDDevice.IsValid()) return;
+		//if (!GEngine->HMDDevice.IsValid()) return;
 		FVector pos = FVector::ZeroVector;
 		FQuat rot = FQuat::Identity;
-		GEngine->HMDDevice->GetCurrentOrientationAndPosition(rot, pos);
+		//GEngine->HMDDevice->GetCurrentOrientationAndPosition(rot, pos);
 		FRotator HmdRot = rot.Rotator();
 		FRotator CombinedRotator = FRotator(0, TeleportRotation.Yaw + HmdRot.Yaw, 0);
 		TeleportDirection->SetWorldRotation(CombinedRotator);
@@ -127,10 +127,10 @@ void UVRCharacterMovementComponent::UpdateArcEndPoint(bool bValidLocationFound, 
 
 bool UVRCharacterMovementComponent::GetTeleportDestination(FVector & OutLocation, FRotator & OutRotation)
 {
-	if (!GEngine->HMDDevice.IsValid()) return false;
+	//if (!GEngine->HMDDevice.IsValid()) return false;
 	FVector hmdPos;
 	FQuat hmdQuat;
-	GEngine->HMDDevice->GetCurrentOrientationAndPosition(hmdQuat, hmdPos);
+//	GEngine->HMDDevice->GetCurrentOrientationAndPosition(hmdQuat, hmdPos);
 	if (VRMovementType == EVRMovementType::MT_TPThumbstickRotation) {
 		FVector HmdUnrotated = TeleportRotation.RotateVector(FVector(hmdPos.X, hmdPos.Y, 0));
 		FVector HmdFinal = TeleportBase->GetComponentLocation() - HmdUnrotated;
