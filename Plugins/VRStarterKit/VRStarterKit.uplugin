@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.2",
+	"FriendlyName": "VR Starter Kit",
+	"Description": "A collection of VR related classes and functions.",
+	"Category": "Virtual Reality",
+	"CreatedBy": "Jake Flynn",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "VRStarterKit",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
+		}
+	]
+}

@@ -8,17 +8,18 @@ AGenericVRPawn::AGenericVRPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	VRSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("VR Scene Root"));
-	RootComponent = VRSceneRoot;
+	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Default Scene Root"));
+	RootComponent = DefaultSceneRoot;
 	VROrigin = CreateDefaultSubobject<USceneComponent>(TEXT("VR Origin"));
-	VROrigin->SetupAttachment(VRSceneRoot);
+	VROrigin->SetupAttachment(DefaultSceneRoot);
+	DefaultCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Default Camera"));
+	DefaultCamera->SetupAttachment(VROrigin);
 }
 
 // Called when the game starts or when spawned
 void AGenericVRPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -33,5 +34,10 @@ void AGenericVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AGenericVRPawn::SpawnMotionController(EControllerHand Hand)
+{
+	
 }
 

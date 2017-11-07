@@ -1,4 +1,7 @@
 ### UnrealEngine ###
+#Starter Content
+Content/StarterContent/*
+
 # Visual Studio 2015 user specific files
 .vs/
 
@@ -74,4 +77,6 @@ Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 
-Content/StarterContent/*
+# Plugin Intermediate and Binary folders
+Plugins/*/Intermediate/*
+Plugins/*/Binaries/*
