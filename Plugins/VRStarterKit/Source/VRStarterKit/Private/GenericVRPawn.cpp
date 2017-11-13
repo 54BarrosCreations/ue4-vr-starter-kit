@@ -20,6 +20,10 @@ AGenericVRPawn::AGenericVRPawn()
 void AGenericVRPawn::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!bDoNotExecuteBaseBeginPlay) {
+		if (!LeftController) SpawnMotionController(EControllerHand::Left);
+		if (!RightController) SpawnMotionController(EControllerHand::Right);
+	}
 }
 
 // Called every frame
@@ -36,8 +40,35 @@ void AGenericVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
-void AGenericVRPawn::SpawnMotionController(EControllerHand Hand)
+void AGenericVRPawn::SpawnMotionController(EControllerHand Hand, bool bInvertScale)
 {
-	
+	//Return if no Motion Controller Template
+	if (!MotionControllerTemplate->IsValidLowLevel()) {
+		UE_LOG(LogTemp, Error, TEXT("Motion Controller Template is not set. Cannot spawn motion controllers."));
+		return;
+	}
+
+	//Spawn Controller
+	FActorSpawnParameters Params;
+	Params.Owner = this;
+	FTransform SpawnTransform = FTransform::Identity;
+	auto a = GetWorld()->SpawnActor<AGenericMotionController>(MotionControllerTemplate, SpawnTransform, Params);
+	if (bInvertScale) a->SetActorScale3D(a->GetActorScale3D() * -1);
+	if (Hand == EControllerHand::Left) {
+		LeftController = a;
+		LeftController->MotionController->Hand = EControllerHand::Left;
+	} else if (Hand == EControllerHand::Right) {
+		RightController = a;
+		RightController->MotionController->Hand = EControllerHand::Right;
+	} else {
+		UE_LOG(LogActor, Error, TEXT("Invalid Hand type. Spawn controller will be marked for kill."));
+		a->Destroy();
+	}
+
+	if (!a) return;
+
+	//Attach Controller to Pawn
+	FAttachmentTransformRules AttachRules = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
+	a->AttachToComponent(VROrigin, AttachRules);
 }
 

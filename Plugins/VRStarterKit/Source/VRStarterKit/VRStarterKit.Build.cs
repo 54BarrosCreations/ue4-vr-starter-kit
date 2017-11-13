@@ -28,7 +28,9 @@ public class VRStarterKit : ModuleRules
 			new string[]
 			{
 				"Core",
+                "InputCore",
                 "SteamVR",
+                "SteamVRController",
                 "HeadMountedDisplay",
 				// ... add other public dependencies that you statically link with here ...
 			}

@@ -3,9 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Runtime/InputCore/Classes/InputCoreTypes.h"
 #include "GenericMotionController.h"
 #include "HeadMountedDisplay.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
+#include "SteamVRFunctionLibrary.h"
+#include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GenericVRPawn.generated.h"
@@ -30,6 +33,15 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Options~~
+	UPROPERTY(VisibleAnywhere, Category = "Generic VR Pawn")
+	//If true will prevent execution of begin play from the base class, allowing it to be fully implemented in blueprint
+	bool bDoNotExecuteBaseBeginPlay = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "Generic VR Pawn")
+	TSubclassOf<AGenericMotionController> MotionControllerTemplate;
+
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Component Hierarchy~~ 
@@ -52,7 +64,7 @@ public:
 	//~~Functions~~
 
 	UFUNCTION(BlueprintCallable, Category = "Generic VR Pawn")
-	void SpawnMotionController(EControllerHand Hand);
+	void SpawnMotionController(EControllerHand Hand, bool bInvertScale = false);
 
 	
 	

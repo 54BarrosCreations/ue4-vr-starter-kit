@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MotionControllerComponent.h"
 #include "GameFramework/Actor.h"
 #include "GenericMotionController.generated.h"
 
@@ -22,6 +23,18 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Options~~
+	UPROPERTY(EditAnywhere, Category = "Generic Motion Controller")
+	//If true will prevent execution of begin play from the base class, allowing it to be fully implemented in blueprint
+	bool bDoNotRunBaseBeginPlay = false;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	USceneComponent* DefaultSceneRoot = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UMotionControllerComponent* MotionController = nullptr;
 
 	
 	
