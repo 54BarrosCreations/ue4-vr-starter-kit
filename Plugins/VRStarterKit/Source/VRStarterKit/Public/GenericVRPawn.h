@@ -39,9 +39,8 @@ public:
 	//If true will prevent execution of begin play from the base class, allowing it to be fully implemented in blueprint
 	bool bDoNotExecuteBaseBeginPlay = false;
 
-	UPROPERTY(VisibleAnywhere, Category = "Generic VR Pawn")
+	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn")
 	TSubclassOf<AGenericMotionController> MotionControllerTemplate;
-
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Component Hierarchy~~ 
@@ -66,6 +65,5 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Generic VR Pawn")
 	void SpawnMotionController(EControllerHand Hand, bool bInvertScale = false);
 
-	
 	
 };

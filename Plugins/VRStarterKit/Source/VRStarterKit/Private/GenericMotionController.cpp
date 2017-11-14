@@ -13,13 +13,32 @@ AGenericMotionController::AGenericMotionController()
 	MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Motion Controller Component"));
 	MotionController->SetupAttachment(DefaultSceneRoot);
 	MotionController->bDisableLowLatencyUpdate = true;
+
+	//Interaction Component
+	InteractionComponent = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("Widget Interaction Component"));
+	InteractionComponent->SetupAttachment(MotionController);
+	if (InteractionMode == EVRInteractionMode::IM_ALWAYS_OFF)	InteractionComponent->SetComponentTickEnabled(false);
+
+	//Attach arrow component
+	auto components = GetComponents().Array();
+	for (UActorComponent* component : components) {
+		if (component->IsA<UArrowComponent>())	ArrowComponent = Cast<UArrowComponent>(component);
+	}
+	ArrowComponent->SetupAttachment(InteractionComponent);
+	//ArrowComponent->SetHiddenInGame(false);
+
+	//Particle System
+	TracePreviewParticleEmitter = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particle System Component"));
+	TracePreviewParticleEmitter->SetupAttachment(InteractionComponent);
 }
 
 // Called when the game starts or when spawned
 void AGenericMotionController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (!bDoNotRunBaseBeginPlay) {
+
+	}
 	
 }
 
@@ -27,6 +46,25 @@ void AGenericMotionController::BeginPlay()
 void AGenericMotionController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!bDoNotRunBaseTick) {
+		HandleInteractionTrace();
+	}
+}
+
+void AGenericMotionController::HandleInteractionTrace()
+{
+	FHitResult Result = InteractionComponent->GetLastHitResult();
+	TracePreviewParticleEmitter->SetBeamSourcePoint(0, Result.TraceStart, 0);
+	TracePreviewParticleEmitter->SetBeamEndPoint(0, Result.TraceEnd);
+}
+
+void AGenericMotionController::RenderPreviewBeam(FVector StartPoint, FVector EndPoint)
+{
+	
+}
+
+void AGenericMotionController::Interact()
+{
 
 }
 
