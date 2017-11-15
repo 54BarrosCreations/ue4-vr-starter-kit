@@ -5,9 +5,6 @@
 #include "CoreMinimal.h"
 #include "Runtime/InputCore/Classes/InputCoreTypes.h"
 #include "GenericMotionController.h"
-#include "HeadMountedDisplay.h"
-#include "HeadMountedDisplayFunctionLibrary.h"
-#include "SteamVRFunctionLibrary.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "GameFramework/Pawn.h"
@@ -44,13 +41,13 @@ public:
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Component Hierarchy~~ 
-	UPROPERTY(VisibleDefaultsOnly)
+	UPROPERTY(VisibleDefaultsOnly, Category = "Generic VR Pawn")
 	USceneComponent* DefaultSceneRoot = nullptr;
 
-	UPROPERTY(VisibleDefaultsOnly)
+	UPROPERTY(VisibleDefaultsOnly, Category = "Generic VR Pawn")
 	USceneComponent* VROrigin = nullptr;
 
-	UPROPERTY(VisibleDefaultsOnly)
+	UPROPERTY(VisibleDefaultsOnly, Category = "Generic VR Pawn")
 	UCameraComponent* DefaultCamera = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Generic VR Pawn")
@@ -64,6 +61,21 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Generic VR Pawn")
 	void SpawnMotionController(EControllerHand Hand, bool bInvertScale = false);
+
+private:
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Input Functions~~
+	UFUNCTION(Category = "Generic VR Pawn")
+	void LeftTriggerDown();
+
+	UFUNCTION(Category = "Generic VR Pawn")
+	void LeftTriggerUp();
+
+	UFUNCTION(Category = "Generic VR Pawn")
+	void RightTriggerDown();
+
+	UFUNCTION(Category = "Generic VR Pawn")
+	void RightTriggerUp();
 
 	
 };

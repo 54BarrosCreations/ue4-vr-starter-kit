@@ -8,7 +8,7 @@ public class FP_VRStarterKit : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "HeadMountedDisplay", "SteamVR", "SteamVRController" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "HeadMountedDisplay", "SteamVR", "SteamVRController", "VRStarterKit" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 

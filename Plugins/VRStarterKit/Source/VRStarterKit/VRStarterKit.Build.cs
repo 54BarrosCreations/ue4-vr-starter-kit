@@ -29,8 +29,6 @@ public class VRStarterKit : ModuleRules
 			{
 				"Core",
                 "InputCore",
-                "SteamVR",
-                "SteamVRController",
                 "UMG",
                 "HeadMountedDisplay",
 				// ... add other public dependencies that you statically link with here ...

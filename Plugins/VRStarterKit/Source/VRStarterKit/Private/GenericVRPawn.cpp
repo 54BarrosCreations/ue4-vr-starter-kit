@@ -72,3 +72,19 @@ void AGenericVRPawn::SpawnMotionController(EControllerHand Hand, bool bInvertSca
 	a->AttachToComponent(VROrigin, AttachRules);
 }
 
+void AGenericVRPawn::LeftTriggerDown()
+{
+}
+
+void AGenericVRPawn::LeftTriggerUp()
+{
+}
+
+void AGenericVRPawn::RightTriggerDown()
+{
+}
+
+void AGenericVRPawn::RightTriggerUp()
+{
+}
+

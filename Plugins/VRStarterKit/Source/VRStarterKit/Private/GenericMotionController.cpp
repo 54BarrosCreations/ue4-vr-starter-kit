@@ -17,15 +17,7 @@ AGenericMotionController::AGenericMotionController()
 	//Interaction Component
 	InteractionComponent = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("Widget Interaction Component"));
 	InteractionComponent->SetupAttachment(MotionController);
-	if (InteractionMode == EVRInteractionMode::IM_ALWAYS_OFF)	InteractionComponent->SetComponentTickEnabled(false);
-
-	//Attach arrow component
-	auto components = GetComponents().Array();
-	for (UActorComponent* component : components) {
-		if (component->IsA<UArrowComponent>())	ArrowComponent = Cast<UArrowComponent>(component);
-	}
-	ArrowComponent->SetupAttachment(InteractionComponent);
-	//ArrowComponent->SetHiddenInGame(false);
+	//if (InteractionMode == EVRInteractionMode::IM_ALWAYS_OFF)	InteractionComponent->SetComponentTickEnabled(false);
 
 	//Particle System
 	TracePreviewParticleEmitter = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particle System Component"));
@@ -63,7 +55,7 @@ void AGenericMotionController::RenderPreviewBeam(FVector StartPoint, FVector End
 	
 }
 
-void AGenericMotionController::Interact()
+void AGenericMotionController::PressInteract()
 {
 
 }

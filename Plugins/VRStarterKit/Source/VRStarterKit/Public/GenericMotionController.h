@@ -11,12 +11,6 @@
 #include "GameFramework/Actor.h"
 #include "GenericMotionController.generated.h"
 
-UENUM(BlueprintType)
-enum class EVRInteractionMode : uint8 {
-	IM_SHOW_ON_WIDGETS_ONLY UMETA(DisplayName = "Only Active Over Widgets"),
-	IM_ALWAYS_OFF UMETA(DisplayName = "Off")
-};
-
 UCLASS()
 class VRSTARTERKIT_API AGenericMotionController : public AActor
 {
@@ -44,8 +38,6 @@ public:
 	//If true will prevent execution of tick from the base class, allowing it to be fully implemented in blueprint
 	bool bDoNotRunBaseTick = false;
 
-	UPROPERTY(EditAnywhere, Category = "Generic Motion Controller")
-	EVRInteractionMode InteractionMode = EVRInteractionMode::IM_ALWAYS_OFF;
 
 	UPROPERTY(EditAnywhere, Category = "Generic Motion Controller")
 	bool bReplicateMotionToServer = false;
@@ -53,19 +45,16 @@ public:
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Component Hierarchy~~
 
-	UPROPERTY(VisibleDefaultsOnly)
+	UPROPERTY(VisibleDefaultsOnly, Category = "Generic Motion Controller")
 	USceneComponent* DefaultSceneRoot = nullptr;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Generic Motion Controller")
 	UMotionControllerComponent* MotionController = nullptr;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Generic Motion Controller")
 	UWidgetInteractionComponent* InteractionComponent = nullptr;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
-	UArrowComponent* ArrowComponent = nullptr;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Generic Motion Controller")
 	UParticleSystemComponent* TracePreviewParticleEmitter = nullptr;
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -84,7 +73,7 @@ public:
 	void RenderPreviewBeam(FVector StartPoint, FVector EndPoint);
 
 	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller")
-	void Interact();
+	void PressInteract();
 
 	
 	
