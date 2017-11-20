@@ -36,6 +36,10 @@ public:
 	//If true will prevent execution of begin play from the base class, allowing it to be fully implemented in blueprint
 	bool bDoNotExecuteBaseBeginPlay = false;
 
+	UPROPERTY(VisibleAnywhere, Category = "Generic VR Pawn")
+	//If true will prevent execution of tick from the base class, allowing it to be fully implemented in blueprint
+	bool bDoNotExecuteBaseTick = false;
+
 	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn")
 	TSubclassOf<AGenericMotionController> MotionControllerTemplate;
 
@@ -57,10 +61,22 @@ public:
 	AGenericMotionController* RightController = nullptr;
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Variables~~
+	UPROPERTY(BlueprintReadOnly, Category = "Generic VR Pawn")
+	AGenericMotionController* ActiveController = nullptr;
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Functions~~
 
 	UFUNCTION(BlueprintCallable, Category = "Generic VR Pawn")
 	void SpawnMotionController(EControllerHand Hand, bool bInvertScale = false);
+
+	UFUNCTION(BlueprintCallable, Category = "Generic VR Pawn")
+	void InitControllerInteraction();
+
+	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller")
+	void SetActiveController(AGenericMotionController* NewActive);
+
 
 private:
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

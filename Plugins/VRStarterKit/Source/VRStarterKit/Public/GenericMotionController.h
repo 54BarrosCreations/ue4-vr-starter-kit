@@ -61,20 +61,27 @@ public:
 	//~~Public Variables~~
 
 	UPROPERTY(BlueprintReadOnly, Category = "Generic Motion Controller")
-	bool bWidgetTraceActive = false;
+	bool bControllerActive = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Generic Motion Controller")
+	bool bFirstTimeSetupComplete = false;
+
+	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller")
+	bool PollForUIHit();
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Public Functions~~
 	
 	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller")
-	void HandleInteractionTrace();
-
-	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller")
-	void RenderPreviewBeam(FVector StartPoint, FVector EndPoint);
+	void HandleInteractionTracePreview();
 
 	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller")
 	void PressInteract();
 
+	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller")
+	void ReleaseInteract();
+
+	
 	
 	
 };

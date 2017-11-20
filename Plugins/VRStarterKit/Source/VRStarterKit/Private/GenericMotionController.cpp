@@ -39,24 +39,39 @@ void AGenericMotionController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (!bDoNotRunBaseTick) {
-		HandleInteractionTrace();
+		HandleInteractionTracePreview();
 	}
 }
 
-void AGenericMotionController::HandleInteractionTrace()
+bool AGenericMotionController::PollForUIHit()
 {
 	FHitResult Result = InteractionComponent->GetLastHitResult();
-	TracePreviewParticleEmitter->SetBeamSourcePoint(0, Result.TraceStart, 0);
-	TracePreviewParticleEmitter->SetBeamEndPoint(0, Result.TraceEnd);
+	if (Result.bBlockingHit && Result.GetComponent()->IsA<UWidgetComponent>()) return true;
+	else return false;
 }
 
-void AGenericMotionController::RenderPreviewBeam(FVector StartPoint, FVector EndPoint)
+void AGenericMotionController::HandleInteractionTracePreview()
 {
-	
+	if (bControllerActive) {
+		if (!TracePreviewParticleEmitter->bVisible)	TracePreviewParticleEmitter->SetVisibility(true);
+		InteractionComponent->Activate();
+		FHitResult Result = InteractionComponent->GetLastHitResult();
+		TracePreviewParticleEmitter->SetBeamSourcePoint(0, Result.TraceStart, 0);
+		TracePreviewParticleEmitter->SetBeamEndPoint(0, Result.TraceEnd);
+	} else {
+		if (TracePreviewParticleEmitter->bVisible)	TracePreviewParticleEmitter->SetVisibility(false);
+		if (bFirstTimeSetupComplete) InteractionComponent->Deactivate();
+	}	
 }
 
 void AGenericMotionController::PressInteract()
 {
-
+	InteractionComponent->PressPointerKey(EKeys::LeftMouseButton);
 }
+
+void AGenericMotionController::ReleaseInteract()
+{
+	InteractionComponent->ReleasePointerKey(EKeys::LeftMouseButton);
+}
+
 
