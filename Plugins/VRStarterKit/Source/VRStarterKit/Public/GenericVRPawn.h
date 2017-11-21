@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Runtime/InputCore/Classes/InputCoreTypes.h"
+#include "VRStarterKitFunctionLibrary.h"
 #include "GenericMotionController.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
@@ -32,16 +33,22 @@ public:
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Options~~
-	UPROPERTY(VisibleAnywhere, Category = "Generic VR Pawn")
+	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn")
 	//If true will prevent execution of begin play from the base class, allowing it to be fully implemented in blueprint
 	bool bDoNotExecuteBaseBeginPlay = false;
 
-	UPROPERTY(VisibleAnywhere, Category = "Generic VR Pawn")
+	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn")
 	//If true will prevent execution of tick from the base class, allowing it to be fully implemented in blueprint
 	bool bDoNotExecuteBaseTick = false;
 
 	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn")
 	TSubclassOf<AGenericMotionController> MotionControllerTemplate;
+
+	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn")
+	bool bAllowMotionControllerWidgetInteraction = true;
+
+	UPROPERTY(EditAnywhere, Category = "Generic VR Pawn: Locomotion")
+	EVRLocomotionType LocomotionType = EVRLocomotionType::LT_TeleportFixedRotation;
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Component Hierarchy~~ 

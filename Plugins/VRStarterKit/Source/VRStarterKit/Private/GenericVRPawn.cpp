@@ -21,8 +21,15 @@ void AGenericVRPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	if (!bDoNotExecuteBaseBeginPlay) {
-		if (!LeftController) SpawnMotionController(EControllerHand::Left);
-		if (!RightController) SpawnMotionController(EControllerHand::Right);
+		if (LocomotionType != EVRLocomotionType::LT_Gamepad) {
+			if (!LeftController) SpawnMotionController(EControllerHand::Left);
+			if (!RightController) SpawnMotionController(EControllerHand::Right);
+			if (!bAllowMotionControllerWidgetInteraction) {
+				//Setting these to true before setup will ensure that the interaction components are disabled
+				LeftController->bFirstTimeSetupComplete = true;
+				RightController->bFirstTimeSetupComplete = true;
+			}
+		}
 	}
 }
 
@@ -31,7 +38,7 @@ void AGenericVRPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (!bDoNotExecuteBaseTick) {
-		if (!ActiveController) InitControllerInteraction();
+		if (!ActiveController && bAllowMotionControllerWidgetInteraction) InitControllerInteraction();
 	}
 }
 
