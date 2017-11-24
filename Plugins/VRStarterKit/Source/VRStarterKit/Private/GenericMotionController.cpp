@@ -53,7 +53,7 @@ bool AGenericMotionController::PollForUIHit()
 
 void AGenericMotionController::HandleInteractionTracePreview()
 {
-	if (bControllerActive) {
+	if (bPointerActive) {
 		if (!TracePreviewParticleEmitter->bVisible)	TracePreviewParticleEmitter->SetVisibility(true);
 		InteractionComponent->Activate();
 		FHitResult Result = InteractionComponent->GetLastHitResult();
@@ -90,7 +90,8 @@ bool AGenericMotionController::TraceTeleportDestination(FVector & outNavLocation
 		auto Nav = GetWorld()->GetNavigationSystem();
 		if (!Nav) return false;
 		FVector NavExtent = FVector(500.f, 500.f, 500.f);
-		FVector OutExtent = Nav->ProjectPointToNavigation(this, Result.HitResult.ImpactPoint, (ANavigationData*)0, 0, NavExtent);
+		FNavLocation OutExtent;
+		Nav->ProjectPointToNavigation(Result.HitResult.ImpactPoint, OutExtent, NavExtent);
 		if (!Result.HitResult.Location.Equals(OutExtent, 0.0100)) {
 			outNavLocation = OutExtent;
 			outTraceLocation = Result.HitResult.ImpactPoint;
@@ -105,8 +106,18 @@ bool AGenericMotionController::TraceTeleportDestination(FVector & outNavLocation
 void AGenericMotionController::ActivateTeleporter()
 {
 	if (!TeleportPreviewActor) {
-		
+		FTransform SpawnTransform = FTransform::Identity;
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		auto World = GetWorld();
+		if (World) TeleportPreviewActor = World->SpawnActor<AActor>(TeleportPreviewActorTemplate, SpawnTransform, SpawnParams);
+			
 	}
+}
+
+void AGenericMotionController::DeactivateTeleporter()
+{
+	if (TeleportPreviewActor) TeleportPreviewActor->Destroy();
 }
 
 void AGenericMotionController::GetParentPawn()

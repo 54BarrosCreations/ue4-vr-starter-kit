@@ -11,7 +11,8 @@ enum class EVRLocomotionType : uint8
 {
 	LT_TeleportFixedRotation UMETA(DisplayName="Teleport Fixed Rotation"),
 	LT_TeleportThumbStickRotation UMETA(DisplayName="Teleport Thumb Stick Rotation"),
-	LT_Gamepad UMETA(DisplayName="Gamepad")
+	LT_Gamepad UMETA(DisplayName="Gamepad"),
+	LT_FixedPosition UMETA(DisplayName="Fixed Position")
 };
 
 UCLASS()

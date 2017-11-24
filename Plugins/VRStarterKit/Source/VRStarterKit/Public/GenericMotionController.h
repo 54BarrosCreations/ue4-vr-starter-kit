@@ -76,7 +76,7 @@ public:
 	//~~Public Variables~~
 
 	UPROPERTY(BlueprintReadOnly, Category = "Generic Motion Controller")
-	bool bControllerActive = false;
+	bool bPointerActive = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Generic Motion Controller")
 	bool bFirstTimeSetupComplete = false;
@@ -104,6 +104,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller: Locomotion")
 	void ActivateTeleporter();
+
+	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller: Locomotion")
+	void DeactivateTeleporter();
 
 private:
 	AGenericVRPawn* ParentPawn = nullptr;

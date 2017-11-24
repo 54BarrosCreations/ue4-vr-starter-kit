@@ -70,7 +70,10 @@ public:
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Variables~~
 	UPROPERTY(BlueprintReadOnly, Category = "Generic VR Pawn")
-	AGenericMotionController* ActiveController = nullptr;
+	AGenericMotionController* ActivePointerController = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Generic VR Pawn")
+	AGenericMotionController* ActiveTeleportController = nullptr;
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~Functions~~
@@ -82,7 +85,10 @@ public:
 	void InitControllerInteraction();
 
 	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller")
-	void SetActiveController(AGenericMotionController* NewActive);
+	void SetActivePointerController(AGenericMotionController* NewActive);
+
+	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller")
+	void SetActiveTeleporterController(AGenericMotionController* NewActive);
 
 
 private:

@@ -38,7 +38,7 @@ void AGenericVRPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (!bDoNotExecuteBaseTick) {
-		if (!ActiveController && bAllowMotionControllerWidgetInteraction) InitControllerInteraction();
+		if (!ActivePointerController && bAllowMotionControllerWidgetInteraction) InitControllerInteraction();
 	}
 }
 
@@ -99,26 +99,33 @@ void AGenericVRPawn::InitControllerInteraction()
 	bool RightControllerUIHit = RightController->PollForUIHit();
 
 	if (LeftControllerUIHit) {
-		SetActiveController(LeftController);
+		SetActivePointerController(LeftController);
 		LeftController->bFirstTimeSetupComplete = true;
 		RightController->bFirstTimeSetupComplete = true;
 	} else if (RightControllerUIHit) {
-		SetActiveController(RightController);
+		SetActivePointerController(RightController);
 		LeftController->bFirstTimeSetupComplete = true;
 		RightController->bFirstTimeSetupComplete = true;
 	} 
 }
 
-void AGenericVRPawn::SetActiveController(AGenericMotionController * NewActive)
+void AGenericVRPawn::SetActivePointerController(AGenericMotionController * NewActive)
 {
-	if (ActiveController) ActiveController->bControllerActive = false;
-	ActiveController = NewActive;
-	if (ActiveController) ActiveController->bControllerActive = true;
+	if (ActivePointerController) ActivePointerController->bPointerActive = false;
+	ActivePointerController = NewActive;
+	if (ActivePointerController) ActivePointerController->bPointerActive = true;
+}
+
+void AGenericVRPawn::SetActiveTeleporterController(AGenericMotionController * NewActive)
+{
+	if (ActiveTeleportController) ActiveTeleportController->DeactivateTeleporter();
+	ActiveTeleportController = NewActive;
+	if (ActiveTeleportController) ActiveTeleportController->ActivateTeleporter();
 }
 
 void AGenericVRPawn::LeftTriggerDown()
 {
-	if (ActiveController && ActiveController == RightController) SetActiveController(LeftController);
+	if (ActivePointerController && ActivePointerController == RightController) SetActivePointerController(LeftController);
 	LeftController->PressInteract();
 }
 
@@ -129,7 +136,7 @@ void AGenericVRPawn::LeftTriggerUp()
 
 void AGenericVRPawn::RightTriggerDown()
 {
-	if (ActiveController && ActiveController == LeftController) SetActiveController(RightController);
+	if (ActivePointerController && ActivePointerController == LeftController) SetActivePointerController(RightController);
 	RightController->PressInteract();
 }
 
