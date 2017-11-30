@@ -108,6 +108,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Generic Motion Controller: Locomotion")
 	void DeactivateTeleporter();
 
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~Blueprint Events~~
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Generic Motion Controller")
+	void RenderTeleportPreview(const TArray<FVector>& OutSplinePoints);
+
 private:
 	AGenericVRPawn* ParentPawn = nullptr;
 	void GetParentPawn();
